@@ -21,7 +21,7 @@ module.exports = function(grunt) {
                 livereload: true
             },
             spec: {
-                files: ['spec/**/*', 'src/**/*'],
+                files: ['app/spec/**/*', 'app/src/**/*'],
             }
         },
 
@@ -30,7 +30,7 @@ module.exports = function(grunt) {
                 options : {
                     port       : 9001,
                     hostname: 'localhost',
-                    base       : './',
+                    base       : './app/',
                     middleware : function (connect, options) {
                         return [lrSnippet, folderMount(connect, options.base)]
                     }
