@@ -1,0 +1,37 @@
+{
+  "name": "backbone-state-machine",
+  "description": "A Backbone View with a built in Finite State Machine",
+  "version": "0.0.1",
+  "homepage": "",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/pajtai/backbone-state-machine.git"
+  },
+  "author": "Peter Ajtai",
+  "keywords": [],
+  "bugs": {
+    "email": "peter.ajtai@thinksolid.com",
+    "url": "http://github.com/pajtai/backbone-state-machine/issues"
+  },
+  "engines": {
+    "node": ">=0.8.19"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://opensource.org/licenses/MIT"
+    }
+  ],
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-watch": "~0.4.4",
+    "grunt-contrib-livereload": "~0.1.2",
+    "mocha": "~1.12.0",
+    "should": "~1.2.2",
+    "backbone": "~1.0.0",
+    "chai": "~1.7.2",
+    "grunt-open": "~0.2.0",
+    "matchdep": "~0.1.2",
+    "grunt-contrib-connect": "~0.3.0"
+  }
+}
