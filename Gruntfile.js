@@ -42,10 +42,28 @@ module.exports = function(grunt) {
             reload : {
                 path : 'http://localhost:9001/'
             }
+        },
+
+        copy: {
+            build: {
+                files: [
+                    {expand: true, cwd: 'app/', src: ['**'], dest: 'build'}
+                ]
+            }
+        },
+
+        build_gh_pages: {
+            ghPages: {
+                options: {
+                    build_branch: "gh-pages",
+                    dist: "build"
+                }
+            }
         }
 
     });
 
     // To start editing your slideshow using livereload, run "grunt server"
     grunt.registerTask("server", "Build and watch task", ["connect", "open", "watch"]);
+    grunt.registerTask("deploy", "Deploy to gh-pages", ["copy", "build_gh_pages"]);
 };
