@@ -1,8 +1,16 @@
+/*global describe:false, beforeEach:false*, chai:false, it:false*/
 describe( "When there is a ViewState,", function () {
 
-    var stateView, stateView2, expect = chai.expect;
+    var stateView,
+        stateView2,
+        invalidStateTriggered,
+        expect = chai.expect,
+        triggeredStates;
 
     beforeEach(function() {
+
+        triggeredStates = [];
+
         stateView = new StateView({
             initialState : "notStarted",
             states : {
@@ -34,7 +42,12 @@ describe( "When there is a ViewState,", function () {
             eventListeners: {
                 invalidstate: [
                     function() {
-                        invalidstateTriggered = true;
+                        invalidStateTriggered = true;
+                    }
+                ],
+                onEnter: [
+                    function(state) {
+                        triggeredStates.push(state);
                     }
                 ]
             }
@@ -63,7 +76,7 @@ describe( "When there is a ViewState,", function () {
             eventListeners: {
                 invalidstate: [
                     function() {
-                        invalidstateTriggered = true;
+                        invalidStateTriggered = true;
                     }
                 ]
             }
@@ -79,9 +92,16 @@ describe( "When there is a ViewState,", function () {
             , ["notStarted", "started", "finished"]).length).to.deep.equal([]);
     });
 
-    it("the initial state is set", function() {
-        expect(stateView.getState()).to.equal("notStarted");
-        expect(stateView2.getState()).to.equal("stopped");
+    describe("the initial state", function() {
+
+        it("is set", function() {
+            expect(stateView.getState()).to.equal("notStarted");
+            expect(stateView2.getState()).to.equal("stopped");
+        });
+
+        it("triggers a 'onEnter:transitioning' event", function() {
+            expect(triggeredStates).to.contain("transitioning");
+        });
     });
 
     describe("transitioning", function() {
