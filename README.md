@@ -10,6 +10,5 @@ http://pajtai.github.io/backbone-state-machine/spec
 ```
 git clone ...
 npm install
-bower install
 grunt server
 ```
