@@ -1,4 +1,5 @@
-/*global describe:false, beforeEach:false*, chai:false, it:false*/
+/*global describe:false, beforeEach:false*, chai:false, it:false, require:false*/
+
 describe( "When there is a ViewState,", function () {
 
     var stateView,
@@ -47,7 +48,12 @@ describe( "When there is a ViewState,", function () {
                 ],
                 onEnter: [
                     function(state) {
-                        triggeredStates.push(state);
+                        triggeredStates.push("onEnter:" + state);
+                    }
+                ],
+                onExit: [
+                    function(state) {
+                        triggeredStates.push("onExit:" + state);
                     }
                 ]
             }
@@ -100,7 +106,11 @@ describe( "When there is a ViewState,", function () {
         });
 
         it("triggers a 'onEnter:transitioning' event", function() {
-            expect(triggeredStates).to.contain("transitioning");
+            expect(triggeredStates).to.contain("onEnter:transitioning");
+        });
+
+        it("triggers a 'onExit:transitioning' event", function() {
+            expect(triggeredStates).to.contain("onExit:transitioning");
         });
     });
 
