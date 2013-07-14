@@ -1,11 +1,18 @@
+/*global require:false */
 (function() {
+    "use strict";
         // Set common strings as variables for IDE code completion
     var STATES = "states",
         CURRENT_STATE = "currentState",
+        ON_BEGIN = "onBegin",
         ON_ENTER = "onEnter",
+        ON_EXIT = "onExit",
+        ON_FINISH = "onFinish",
         TRANSITIONING = "transitioning",
-
         StateView = Backbone.View.extend({
+
+            stateModel: undefined,
+            states: undefined,
 
             initialize: initialize,
             getStates: getStates,
@@ -15,7 +22,7 @@
 
     function initialize() {
         var states = this.options.states,
-            listeners = ["onEnter"];
+            listeners = [ON_BEGIN, ON_ENTER, ON_EXIT, ON_FINISH];
         this.stateModel = new Backbone.Model();
         this.stateModel.set(STATES, _.keys(states));
         this.states = this.options.states;
@@ -52,16 +59,18 @@
     }
 
     function currentStateChanged() {
+        // args for old state, new state
         this.trigger("transition");
     }
 
-    // onEnter:transitioning
+    // onBegin:transitioning
     // onExit:OLD_STATE
     // onEnter:NEW_STATE
-    // onExit:transitioning
+    // onFinish:transitioning
     function transitionTo(newState) {
-        this.trigger(ON_ENTER, TRANSITIONING);
+        this.trigger(ON_BEGIN, TRANSITIONING);
         this.stateModel.set(CURRENT_STATE, newState);
+        this.trigger(ON_FINISH, TRANSITIONING);
     }
 
     window.StateView = StateView;

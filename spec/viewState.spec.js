@@ -1,4 +1,5 @@
-/*global describe:false, beforeEach:false*, chai:false, it:false*/
+/*global describe:false, beforeEach:false*, chai:false, it:false, require:false*/
+
 describe( "When there is a ViewState,", function () {
 
     var stateView,
@@ -45,9 +46,24 @@ describe( "When there is a ViewState,", function () {
                         invalidStateTriggered = true;
                     }
                 ],
+                onBegin: [
+                    function(state) {
+                        triggeredStates.push({onBegin: state});
+                    }
+                ],
+                onFinish: [
+                    function(state) {
+                        triggeredStates.push({onFinish: state});
+                    }
+                ],
                 onEnter: [
                     function(state) {
-                        triggeredStates.push(state);
+                        triggeredStates.push({onEnter: state});
+                    }
+                ],
+                onExit: [
+                    function(state) {
+                        triggeredStates.push({onExit: state});
                     }
                 ]
             }
@@ -99,8 +115,12 @@ describe( "When there is a ViewState,", function () {
             expect(stateView2.getState()).to.equal("stopped");
         });
 
-        it("triggers a 'onEnter:transitioning' event", function() {
-            expect(triggeredStates).to.contain("transitioning");
+        it("first triggers an 'onBegin' event with 'transitioning' as the argument", function() {
+            expect(triggeredStates[0]).to.deep.equal({onBegin: 'transitioning'});
+        });
+
+        it("triggers a 'onExit:transitioning' event", function() {
+            expect(triggeredStates[1]).to.deep.equal({onFinish: 'transitioning'});
         });
     });
 
