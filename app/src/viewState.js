@@ -1,26 +1,18 @@
 /*global require:false */
-if (typeof require !== 'undefined') {
-    var _ = require("Backbone/node_modules/underscore"),
-        Backbone = require("Backbone");
-}
-
-(function(root) {
+(function() {
     "use strict";
         // Set common strings as variables for IDE code completion
     var STATES = "states",
         CURRENT_STATE = "currentState",
+        ON_BEGIN = "onBegin",
         ON_ENTER = "onEnter",
         ON_EXIT = "onExit",
+        ON_FINISH = "onFinish",
         TRANSITIONING = "transitioning",
-        Backbone = (function() {
-            if (root && root.Backbone) {
-                return root.Backbone;
-            }
-            if (typeof require !== 'undefined') {
-                return require('Backbone');
-            }
-        }()),
         StateView = Backbone.View.extend({
+
+            stateModel: undefined,
+            states: undefined,
 
             initialize: initialize,
             getStates: getStates,
@@ -30,7 +22,7 @@ if (typeof require !== 'undefined') {
 
     function initialize() {
         var states = this.options.states,
-            listeners = [ON_ENTER, ON_EXIT];
+            listeners = [ON_BEGIN, ON_ENTER, ON_EXIT, ON_FINISH];
         this.stateModel = new Backbone.Model();
         this.stateModel.set(STATES, _.keys(states));
         this.states = this.options.states;
@@ -67,41 +59,19 @@ if (typeof require !== 'undefined') {
     }
 
     function currentStateChanged() {
+        // args for old state, new state
         this.trigger("transition");
     }
 
-    // onEnter:transitioning
+    // onBegin:transitioning
     // onExit:OLD_STATE
     // onEnter:NEW_STATE
-    // onExit:transitioning
+    // onFinish:transitioning
     function transitionTo(newState) {
-        this.trigger(ON_ENTER, TRANSITIONING);
+        this.trigger(ON_BEGIN, TRANSITIONING);
         this.stateModel.set(CURRENT_STATE, newState);
-        this.trigger(ON_EXIT, TRANSITIONING);
+        this.trigger(ON_FINISH, TRANSITIONING);
     }
 
-    if ( typeof module === "object" && module && typeof module.exports === "object" ) {
-        // Expose StateView as module.exports in loaders that implement the Node
-        // module pattern (including browserify). Do not create the global, since
-        // the user will be storing it themselves locally, and globals are frowned
-        // upon in the Node module world.
-        module.exports = StateView;
-    } else {
-        // Register as a named AMD module, since StateView can be concatenated with other
-        // files that may use define, but not via a proper concatenation script that
-        // understands anonymous AMD modules. A named AMD is safest and most robust
-        // way to register. Lowercase StateView is used because AMD module names are
-        // derived from file names, and StateView is normally delivered in a lowercase
-        // file name. Do this after creating the global so that if an AMD module wants
-        // to call noConflict to hide this version of StateView, it will work.
-        if ( typeof define === "function" && define.amd ) {
-            define( "StateView", ["underscore", "backbone" ], function (_, Backbone) { return StateView; } );
-        }
-    }
-
-// If there is a window object, that at least has a document property,
-// define StateView
-    if ( typeof window === "object" && typeof window.document === "object" ) {
-        window.StateView = StateView;
-    }
-}(this));
+    window.StateView = StateView;
+}());
