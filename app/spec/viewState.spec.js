@@ -115,13 +115,6 @@ describe( "When there is a ViewState,", function () {
             expect(stateView2.getState()).to.equal("stopped");
         });
 
-        it("first triggers an 'onBegin' event with 'transitioning' as the argument", function() {
-            expect(triggeredStates[0]).to.deep.equal({onBegin: 'transitioning'});
-        });
-
-        it("triggers a 'onExit:transitioning' event", function() {
-            expect(triggeredStates[1]).to.deep.equal({onFinish: 'transitioning'});
-        });
     });
 
     describe("transitioning", function() {
@@ -136,6 +129,14 @@ describe( "When there is a ViewState,", function () {
             function transition() {
                 transitioned = true;
             }
+        });
+
+        it("first triggers an 'onBegin' event with 'transitioning' as the argument", function() {
+            expect(triggeredStates[0]).to.deep.equal({onBegin: 'transitioning'});
+        });
+
+        it("lastly triggers a 'onFinish' event with 'transtioning' as the argument", function() {
+            expect(triggeredStates[triggeredStates.length - 1]).to.deep.equal({onFinish: 'transitioning'});
         });
 
         it("fires an event", function() {
