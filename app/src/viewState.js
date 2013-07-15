@@ -42,9 +42,12 @@
     }
 
     function transition(newState) {
-        var state = this.stateModel.get(CURRENT_STATE);
-        if (!state || _.contains(this.states[state].allowedTransitions, newState)) {
-            transitionTo.apply(this, arguments);
+        var currentState = this.stateModel.get(CURRENT_STATE);
+        if (!currentState || _.contains(this.states[currentState].allowedTransitions, newState)) {
+            transitionTo.call(this, {
+                current: currentState,
+                next: newState
+            });
         }
     }
 
@@ -58,18 +61,18 @@
         });
     }
 
-    function currentStateChanged() {
+    function currentStateChanged(model, currentState) {
         // args for old state, new state
-        this.trigger("transition");
+        this.trigger("transition", {
+            previous: model.previous("currentState"),
+            current: currentState});
     }
 
-    // onBegin:transitioning
-    // onExit:OLD_STATE
-    // onEnter:NEW_STATE
-    // onFinish:transitioning
-    function transitionTo(newState) {
+    function transitionTo(states) {
         this.trigger(ON_BEGIN, TRANSITIONING);
-        this.stateModel.set(CURRENT_STATE, newState);
+        this.trigger(ON_EXIT, states.current);
+        this.stateModel.set(CURRENT_STATE, states.next);
+        this.trigger(ON_ENTER, states.next);
         this.trigger(ON_FINISH, TRANSITIONING);
     }
 

@@ -1,11 +1,15 @@
 /*global describe:false, beforeEach:false*, chai:false, it:false, require:false*/
 
-describe( "When there is a ViewState,", function () {
+describe( "When there is a Backbone-State-Machine,", function () {
 
     var bbsm,
         invalidStateTriggered,
         expect = chai.expect,
         triggeredStates;
+        // should = chai.should;
+
+    // Includel a stack trace when needed
+    // chai.Assertion.includeStack = true;
 
     beforeEach(function() {
 
@@ -95,8 +99,9 @@ describe( "When there is a ViewState,", function () {
             bbsm.listenTo(bbsm, "transition", transition);
             transitioned = false;
 
-            function transition() {
-                transitioned = true;
+            function transition(description) {
+                transitioned = description;
+                triggeredStates.push(description);
             }
         });
 
@@ -108,17 +113,42 @@ describe( "When there is a ViewState,", function () {
             expect(triggeredStates[triggeredStates.length - 1]).to.deep.equal({onFinish: 'transitioning'});
         });
 
-        it("fires an event", function() {
+        it("fires an event that includes the previous and current states in the payload", function() {
             expect(transitioned).to.be.false;
             bbsm.transition("started");
-            expect(transitioned).to.be.true;
+            expect(transitioned).to.deep.equal({
+                previous: "notStarted",
+                current: "started"
+            });
         });
 
         describe("to an allowed state", function() {
+            beforeEach(function() {
+                triggeredStates = [];
+                bbsm.transition("started");
+            });
 
             it("does so", function() {
-                bbsm.transition("started");
                 expect(bbsm.getState()).to.equal("started");
+            });
+
+            it("secondly fires an 'onExit' describing the state being exited", function() {
+                expect(triggeredStates[1]).to.deep.equal({
+                    onExit: "notStarted"
+                });
+            });
+
+            it("thirdly fires a 'change' method describing the states transitioned from and to", function() {
+                expect(triggeredStates[2]).to.deep.equal({
+                    previous: "notStarted",
+                    current: "started"
+                });
+            });
+
+            it("fourthly fires an 'onEnter' describing the state being entered", function() {
+                expect(triggeredStates[3]).to.deep.equal({
+                    onEnter: "started"
+                });
             });
         });
 
