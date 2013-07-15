@@ -9,7 +9,7 @@
         ON_EXIT = "onExit",
         ON_FINISH = "onFinish",
         TRANSITIONING = "transitioning",
-        StateView = Backbone.View.extend({
+        BBSM = Backbone.View.extend({
 
             stateModel: undefined,
             states: undefined,
@@ -73,5 +73,5 @@
         this.trigger(ON_FINISH, TRANSITIONING);
     }
 
-    window.StateView = StateView;
+    window.BBSM = BBSM;
 }());
