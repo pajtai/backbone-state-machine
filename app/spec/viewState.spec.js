@@ -68,6 +68,11 @@ describe( "When there is a Backbone-State-Machine,", function () {
                     function(state) {
                         triggeredStates.push({onFinish: state});
                     }
+                ],
+                onNotHandled: [
+                    function(methodName) {
+
+                    }
                 ]
             }
         });
