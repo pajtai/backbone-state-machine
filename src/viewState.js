@@ -9,6 +9,8 @@
         ON_ENTER = "onEnter",
         ON_EXIT = "onExit",
         ON_FINISH = "onFinish",
+        ON_METHOD_NOT_HANDLED = "onMethodNotHandled",
+        ON_TRANSITION_NOT_HANDLED = "onTransitionNotHandled",
         TRANSITIONING = "transitioning",
         BBSM = Backbone.View.extend({
 
@@ -24,7 +26,8 @@
 
     function initialize() {
         var states = this.options.states,
-            listeners = [ON_BEGIN, ON_ENTER, ON_EXIT, ON_FINISH];
+            listeners = [ON_BEGIN, ON_ENTER, ON_EXIT, ON_FINISH, ON_TRANSITION_NOT_HANDLED,
+                ON_METHOD_NOT_HANDLED];
         this.stateModel = new Backbone.Model();
         this.stateModel.set(STATES, _.keys(states));
         this.states = this.options.states;
