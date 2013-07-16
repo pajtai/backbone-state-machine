@@ -5,7 +5,7 @@ describe( "When there is a Backbone-State-Machine,", function () {
 
     var bbsm,
         invalidStateTriggered,
-        expect = chai.expect,
+        should = chai.should(),
         triggeredEvents,
         calledMethods;
 
@@ -87,22 +87,22 @@ describe( "When there is a Backbone-State-Machine,", function () {
     });
 
     it("it exists", function() {
-       expect(bbsm).to.not.be.undefined;
+       should.exist(bbsm);
     });
 
     it("the states are stored", function() {
-        expect(_.difference(bbsm.getStates()
-            , ["notStarted", "started", "finished"]).length).to.deep.equal([]);
+        (_.difference(bbsm.getStates()
+            , ["notStarted", "started", "finished"]).length).should.deep.equal([]);
     });
 
     describe("the initial state", function() {
 
         it("is set", function() {
-            expect(bbsm.getState()).to.equal("notStarted");
+            bbsm.getState().should.equal("notStarted");
         });
 
         it("has its onExit method attached if supplied", function() {
-            expect(typeof bbsm.onExit).to.equal("function");
+            (typeof bbsm.onExit).should.equal("function");
         });
 
     });
@@ -123,17 +123,17 @@ describe( "When there is a Backbone-State-Machine,", function () {
         });
 
         it("first triggers an 'onBegin' event with 'transitioning' as the argument", function() {
-            expect(triggeredEvents[0]).to.deep.equal({onBegin: 'transitioning'});
+            triggeredEvents[0].should.deep.equal({onBegin: 'transitioning'});
         });
 
         it("lastly triggers a 'onFinish' event with 'transtioning' as the argument", function() {
-            expect(triggeredEvents[triggeredEvents.length - 1]).to.deep.equal({onFinish: 'transitioning'});
+            triggeredEvents[triggeredEvents.length - 1].should.deep.equal({onFinish: 'transitioning'});
         });
 
         it("fires an event that includes the previous and current states in the payload", function() {
-            expect(transitioned).to.be.false;
+            transitioned.should.be.false;
             bbsm.transition("started");
-            expect(transitioned).to.deep.equal({
+            transitioned.should.deep.equal({
                 previous: "notStarted",
                 current: "started"
             });
@@ -147,34 +147,34 @@ describe( "When there is a Backbone-State-Machine,", function () {
             });
 
             it("does so", function() {
-                expect(bbsm.getState()).to.equal("started");
+                bbsm.getState().should.equal("started");
             });
 
             it("secondly fires an 'onExit' describing the state being exited", function() {
-                expect(triggeredEvents[1]).to.deep.equal({
+                triggeredEvents[1].should.deep.equal({
                     onExit: "notStarted"
                 });
             });
 
             it("thirdly fires a 'change' method describing the states transitioned from and to", function() {
-                expect(triggeredEvents[2]).to.deep.equal({
+                triggeredEvents[2].should.deep.equal({
                     previous: "notStarted",
                     current: "started"
                 });
             });
 
             it("fourthly fires an 'onEnter' describing the state being entered", function() {
-                expect(triggeredEvents[3]).to.deep.equal({
+                triggeredEvents[3].should.deep.equal({
                     onEnter: "started"
                 });
             });
 
             it("calls the 'onExit' method of the old state", function() {
-                expect(calledMethods[0]).to.deep.equal("notStarted.onExit()");
+                calledMethods[0].should.deep.equal("notStarted.onExit()");
             });
 
             it("calls the 'onEnter' method of the new state", function() {
-                expect(calledMethods[1]).to.deep.equal("started.onEnter()");
+                calledMethods[1].should.deep.equal("started.onEnter()");
             });
         });
 
@@ -182,7 +182,7 @@ describe( "When there is a Backbone-State-Machine,", function () {
 
             it("does not change state", function() {
                 bbsm.transition("blah");
-                expect(bbsm.getState()).not.to.equal("blah");
+                bbsm.getState().should.not.to.equal("blah");
             });
 
         });
@@ -196,18 +196,18 @@ describe( "When there is a Backbone-State-Machine,", function () {
         it("gets its methods attached", function() {
 
             var notStartedMethods = ["start", "onExit"];
-            expect(bbsm.getState()).to.equal("notStarted");
+            bbsm.getState().should.equal("notStarted");
             _.forEach(notStartedMethods, function(methodName) {
-                expect(typeof bbsm[methodName]).to.equal("function");
+                (typeof bbsm[methodName]).should.equal("function");
             });
         });
 
         it("does not get its allowedTransitions attached as a field", function() {
-            expect(typeof bbsm.allowedTransitions).to.equal("undefined");
+            (typeof bbsm.allowedTransitions).should.equal("undefined");
         });
 
         it("can be queried about its allowedTransitions using, 'getAllowedTransitions'", function() {
-            expect(bbsm.getAllowedTransitions("started")).to.deep.equal(["finished"]);
+            bbsm.getAllowedTransitions("started").should.deep.equal(["finished"]);
         });
 
         it("triggers a 'notHandled' event if a method from another state is called", function() {
