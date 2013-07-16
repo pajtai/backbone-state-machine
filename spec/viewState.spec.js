@@ -77,9 +77,9 @@ describe( "When there is a Backbone-State-Machine,", function () {
                         triggeredEvents.push({onFinish: state});
                     }
                 ],
-                onNotHandled: [
+                onTransitionNotHandled: [
                     function(methodName) {
-                        triggeredEvents.push({onNotHandled: methodName});
+                        triggeredEvents.push({onTransitionNotHandled: methodName});
                     }
                 ]
             }
