@@ -1,4 +1,4 @@
-/*global require:false */
+/*global Backbone:false, _:false, define:false */
 (function() {
     "use strict";
     var BBSM = Backbone.View.extend({
@@ -37,7 +37,7 @@
         if (this.options.initialState) {
             this.transition(this.options.initialState);
         }
-    };
+    }
 
     function getStates() {
         return this.stateModel.get(STATES);
@@ -61,7 +61,7 @@
 
     function getAllowedTransitions(state) {
         return this.states[state].allowedTransitions;
-    };
+    }
 
     // +---------------------------------------------------------------------------------------------------------------+
     // ++-------------------------------------------------------------------------------------------------------------++
