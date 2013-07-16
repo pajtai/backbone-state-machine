@@ -12,6 +12,7 @@
         ON_METHOD_NOT_HANDLED = "onMethodNotHandled",
         ON_TRANSITION_NOT_HANDLED = "onTransitionNotHandled",
         TRANSITIONING = "transitioning",
+        TRANSITION = "transition",
         BBSM = Backbone.View.extend({
 
             stateModel: undefined,
@@ -31,7 +32,7 @@
         this.stateModel = new Backbone.Model();
         this.stateModel.set(STATES, _.keys(states));
         this.states = this.options.states;
-        this.listenTo(this.stateModel, "change:currentState", currentStateChanged.bind(this));
+        this.listenTo(this.stateModel, "change:" + CURRENT_STATE, currentStateChanged.bind(this));
         setupListeners.call(this, listeners);
         if (this.options.initialState) {
             this.transition(this.options.initialState);
@@ -53,6 +54,8 @@
                 current: currentState,
                 next: newState
             });
+        } else {
+            failTransition.call(this, newState);
         }
     }
 
@@ -74,8 +77,8 @@
 
     function currentStateChanged(model, currentState) {
         // args for old state, new state
-        this.trigger("transition", {
-            previous: model.previous("currentState"),
+        this.trigger(TRANSITION, {
+            previous: model.previous(CURRENT_STATE),
             current: currentState});
     }
 
@@ -87,6 +90,10 @@
         this.stateModel.set(CURRENT_STATE, states.next);
         this.trigger(ON_ENTER, states.next);
         this.trigger(ON_FINISH, TRANSITIONING);
+    }
+
+    function failTransition(failedState) {
+        this.trigger(ON_TRANSITION_NOT_HANDLED, failedState);
     }
 
     // Remove methods available in 'state' and replace them with noops
