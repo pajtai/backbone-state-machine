@@ -1,7 +1,6 @@
 /*global require:false */
 (function() {
     "use strict";
-        // Set common strings as variables for IDE code completion
     var BBSM = Backbone.View.extend({
 
             stateModel: undefined,
@@ -13,6 +12,7 @@
             transition: transition,
             getAllowedTransitions: getAllowedTransitions
         }),
+    // Set common strings as variables for IDE code completion
         STATES = "states",
         CURRENT_STATE = "currentState",
         FUNCTION = "function",
