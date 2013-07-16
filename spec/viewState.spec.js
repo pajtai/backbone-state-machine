@@ -2,11 +2,12 @@
 
 describe( "When there is a Backbone-State-Machine,", function () {
 
+
     var bbsm,
         invalidStateTriggered,
         expect = chai.expect,
-        triggeredStates;
-        // should = chai.should;
+        triggeredStates,
+        calledMethods;
 
     // Includel a stack trace when needed
     // chai.Assertion.includeStack = true;
@@ -14,6 +15,7 @@ describe( "When there is a Backbone-State-Machine,", function () {
     beforeEach(function() {
 
         triggeredStates = [];
+        calledMethods = [];
 
         bbsm = new BBSM({
             initialState : "notStarted",
@@ -22,11 +24,17 @@ describe( "When there is a Backbone-State-Machine,", function () {
                     start : function () {
                         this.transition( "started" );
                     },
+                    onExit: function() {
+                        calledMethods.push("notStarted.onExit()")
+                    },
                     allowedTransitions: [
                         "started"
                     ]
                 },
                 "started" : {
+                    onEnter: function() {
+                        calledMethods.push("started.onEnter()")
+                    },
                     finish : function () {
                         this.transition( "finished" );
                     },
@@ -68,6 +76,11 @@ describe( "When there is a Backbone-State-Machine,", function () {
                     function(state) {
                         triggeredStates.push({onFinish: state});
                     }
+                ],
+                onNotHandled: [
+                    function(methodName) {
+
+                    }
                 ]
             }
         });
@@ -86,6 +99,10 @@ describe( "When there is a Backbone-State-Machine,", function () {
 
         it("is set", function() {
             expect(bbsm.getState()).to.equal("notStarted");
+        });
+
+        it("has its onExit method attached if supplied", function() {
+            expect(typeof bbsm.onExit).to.equal("function");
         });
 
     });
@@ -125,6 +142,7 @@ describe( "When there is a Backbone-State-Machine,", function () {
         describe("to an allowed state", function() {
             beforeEach(function() {
                 triggeredStates = [];
+                calledMethods = [];
                 bbsm.transition("started");
             });
 
@@ -150,6 +168,14 @@ describe( "When there is a Backbone-State-Machine,", function () {
                     onEnter: "started"
                 });
             });
+
+            it("calls the 'onExit' method of the old state", function() {
+                expect(calledMethods[0]).to.deep.equal("notStarted.onExit()");
+            });
+
+            it("calls the 'onEnter' method of the new state", function() {
+                expect(calledMethods[1]).to.deep.equal("started.onEnter()");
+            });
         });
 
         describe("to a disallowed state", function() {
@@ -160,7 +186,33 @@ describe( "When there is a Backbone-State-Machine,", function () {
             });
 
         });
+
+        // TODO: test calling unhandled method is a noop and not an error
+        // TODO: test calling unhandled onEnter and onExit
     });
 
+    describe("a state", function() {
+
+        it("gets its methods attached", function() {
+
+            var notStartedMethods = ["start", "onExit"];
+            expect(bbsm.getState()).to.equal("notStarted");
+            _.forEach(notStartedMethods, function(methodName) {
+                expect(typeof bbsm[methodName]).to.equal("function");
+            });
+        });
+
+        it("does not get its allowedTransitions attached as a field", function() {
+            expect(typeof bbsm.allowedTransitions).to.equal("undefined");
+        });
+
+        it("can be queried about its allowedTransitions using, 'getAllowedTransitions'", function() {
+            expect(bbsm.getAllowedTransitions("started")).to.deep.equal(["finished"]);
+        });
+
+        it("triggers a 'notHandled' event if a method from another state is called", function() {
+
+        });
+    });
     //TODO: add separate two instances test
 } );

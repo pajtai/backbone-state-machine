@@ -4,6 +4,7 @@
         // Set common strings as variables for IDE code completion
     var STATES = "states",
         CURRENT_STATE = "currentState",
+        FUNCTION = "function",
         ON_BEGIN = "onBegin",
         ON_ENTER = "onEnter",
         ON_EXIT = "onExit",
@@ -17,7 +18,8 @@
             initialize: initialize,
             getStates: getStates,
             getState: getState,
-            transition: transition
+            transition: transition,
+            getAllowedTransitions: getAllowedTransitions
         });
 
     function initialize() {
@@ -51,6 +53,10 @@
         }
     }
 
+    function getAllowedTransitions(state) {
+        return this.states[state].allowedTransitions;
+    };
+
     // Private methods -------------------------------------------------------------------------------------------------
     function setupListeners(listeners) {
         var self = this;
@@ -59,6 +65,8 @@
                 self.listenTo(self, oneListener, listener.bind(self));
             });
         });
+        this.listenTo(this, ON_ENTER, callOnEnterOfState);
+        this.listenTo(this, ON_EXIT, callOnExitOfState);
     }
 
     function currentStateChanged(model, currentState) {
@@ -71,10 +79,40 @@
     function transitionTo(states) {
         this.trigger(ON_BEGIN, TRANSITIONING);
         this.trigger(ON_EXIT, states.current);
+        detachStateMethods.call(this, states.current);
+        attachStateMethods.call(this, states.next);
         this.stateModel.set(CURRENT_STATE, states.next);
         this.trigger(ON_ENTER, states.next);
         this.trigger(ON_FINISH, TRANSITIONING);
     }
 
+    // Remove methods available in 'state' and replace them with noops
+    function detachStateMethods(state) {
+
+    }
+
+    // Attach method available in 'state'
+    function attachStateMethods(state) {
+        var states = this.states[state];
+        _.forEach(_.keys(states), function(stateMethod) {
+            if (typeof states[stateMethod] === FUNCTION) {
+                this[stateMethod] = states[stateMethod];
+            }
+        }.bind(this));
+    }
+
+    function callOnEnterOfState() {
+        if (this.onEnter) {
+            this.onEnter();
+        }
+    }
+
+    function callOnExitOfState() {
+        if (this.onExit) {
+            this.onExit();
+        }
+    }
+
+    //TODO: add AMD support
     window.BBSM = BBSM;
 }());
