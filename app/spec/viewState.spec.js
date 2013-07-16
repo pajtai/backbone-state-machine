@@ -10,7 +10,7 @@ describe( "When there is a Backbone-State-Machine,", function () {
         calledMethods;
 
     // Includel a stack trace when needed
-    // chai.Assertion.includeStack = true;
+    chai.Assertion.includeStack = false;
 
     beforeEach(function() {
 
@@ -79,7 +79,7 @@ describe( "When there is a Backbone-State-Machine,", function () {
                 ],
                 onNotHandled: [
                     function(methodName) {
-
+                        triggeredEvents.push({onNotHandled: methodName});
                     }
                 ]
             }
@@ -180,9 +180,19 @@ describe( "When there is a Backbone-State-Machine,", function () {
 
         describe("to a disallowed state", function() {
 
-            it("does not change state", function() {
+            beforeEach(function() {
+                triggeredEvents = [];
                 bbsm.transition("blah");
+            });
+
+            it("does not change state", function() {
                 bbsm.getState().should.not.to.equal("blah");
+            });
+
+            it("triggers an onTransitionNotHandled event", function() {
+                triggeredEvents[0].should.deep.equal({
+                    onTransitionNotHandled: "blah"
+                });
             });
 
         });
