@@ -6,7 +6,7 @@ describe( "When there is a Backbone-State-Machine,", function () {
     var bbsm,
         invalidStateTriggered,
         expect = chai.expect,
-        triggeredStates,
+        triggeredEvents,
         calledMethods;
 
     // Includel a stack trace when needed
@@ -14,7 +14,7 @@ describe( "When there is a Backbone-State-Machine,", function () {
 
     beforeEach(function() {
 
-        triggeredStates = [];
+        triggeredEvents = [];
         calledMethods = [];
 
         bbsm = new BBSM({
@@ -59,22 +59,22 @@ describe( "When there is a Backbone-State-Machine,", function () {
                 ],
                 onBegin: [
                     function(state) {
-                        triggeredStates.push({onBegin: state});
+                        triggeredEvents.push({onBegin: state});
                     }
                 ],
                 onEnter: [
                     function(state) {
-                        triggeredStates.push({onEnter: state});
+                        triggeredEvents.push({onEnter: state});
                     }
                 ],
                 onExit: [
                     function(state) {
-                        triggeredStates.push({onExit: state});
+                        triggeredEvents.push({onExit: state});
                     }
                 ],
                 onFinish: [
                     function(state) {
-                        triggeredStates.push({onFinish: state});
+                        triggeredEvents.push({onFinish: state});
                     }
                 ],
                 onNotHandled: [
@@ -118,16 +118,16 @@ describe( "When there is a Backbone-State-Machine,", function () {
 
             function transition(description) {
                 transitioned = description;
-                triggeredStates.push(description);
+                triggeredEvents.push(description);
             }
         });
 
         it("first triggers an 'onBegin' event with 'transitioning' as the argument", function() {
-            expect(triggeredStates[0]).to.deep.equal({onBegin: 'transitioning'});
+            expect(triggeredEvents[0]).to.deep.equal({onBegin: 'transitioning'});
         });
 
         it("lastly triggers a 'onFinish' event with 'transtioning' as the argument", function() {
-            expect(triggeredStates[triggeredStates.length - 1]).to.deep.equal({onFinish: 'transitioning'});
+            expect(triggeredEvents[triggeredEvents.length - 1]).to.deep.equal({onFinish: 'transitioning'});
         });
 
         it("fires an event that includes the previous and current states in the payload", function() {
@@ -141,7 +141,7 @@ describe( "When there is a Backbone-State-Machine,", function () {
 
         describe("to an allowed state", function() {
             beforeEach(function() {
-                triggeredStates = [];
+                triggeredEvents = [];
                 calledMethods = [];
                 bbsm.transition("started");
             });
@@ -151,20 +151,20 @@ describe( "When there is a Backbone-State-Machine,", function () {
             });
 
             it("secondly fires an 'onExit' describing the state being exited", function() {
-                expect(triggeredStates[1]).to.deep.equal({
+                expect(triggeredEvents[1]).to.deep.equal({
                     onExit: "notStarted"
                 });
             });
 
             it("thirdly fires a 'change' method describing the states transitioned from and to", function() {
-                expect(triggeredStates[2]).to.deep.equal({
+                expect(triggeredEvents[2]).to.deep.equal({
                     previous: "notStarted",
                     current: "started"
                 });
             });
 
             it("fourthly fires an 'onEnter' describing the state being entered", function() {
-                expect(triggeredStates[3]).to.deep.equal({
+                expect(triggeredEvents[3]).to.deep.equal({
                     onEnter: "started"
                 });
             });
