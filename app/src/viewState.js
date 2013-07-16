@@ -127,6 +127,10 @@
         }
     }
 
-    //TODO: add AMD support
-    window.BBSM = BBSM;
+    //TODO: check that AMD implementation works
+    if ( typeof define === "function" && define.amd ) {
+        define( "bbsm", ["backbone", "underscore"], function (Backbone, _) { return BBSM; } );
+    } else {
+        window.BBSM = BBSM;
+    }
 }());
