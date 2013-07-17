@@ -2,18 +2,7 @@
 (function() {
     "use strict";
         // Set common strings as variables for IDE code completion
-    var BBSM = Backbone.View.extend({
-
-            stateModel: undefined,
-            states: undefined,
-
-            initialize: initialize,
-            getStates: getStates,
-            getState: getState,
-            transition: transition,
-            getAllowedTransitions: getAllowedTransitions
-        }),
-        STATES = "states",
+    var STATES = "states",
         CURRENT_STATE = "currentState",
         FUNCTION = "function",
         ON_BEGIN = "onBegin",
@@ -23,7 +12,18 @@
         ON_METHOD_NOT_HANDLED = "onMethodNotHandled",
         ON_TRANSITION_NOT_HANDLED = "onTransitionNotHandled",
         TRANSITIONING = "transitioning",
-        TRANSITION = "transition";
+        TRANSITION = "transition",
+        BBSM = Backbone.View.extend({
+
+            stateModel: undefined,
+            states: undefined,
+
+            initialize: initialize,
+            getStates: getStates,
+            getState: getState,
+            transition: transition,
+            getAllowedTransitions: getAllowedTransitions
+        });
 
     function initialize() {
         var states = this.options.states,
@@ -34,6 +34,8 @@
         this.states = this.options.states;
         this.listenTo(this.stateModel, "change:" + CURRENT_STATE, _currentStateChanged.bind(this));
         _setupListeners.call(this, listeners);
+        _setupMethods.call(this);
+        // TODO: put this in a .startMachine or some such
         if (this.options.initialState) {
             this.transition(this.options.initialState);
         }
@@ -102,12 +104,26 @@
 
     // Remove methods available in 'state' and replace them with noops
     function _detachStateMethods(state) {
-
+        var states = this.states[state],
+            self = this;
+        if (!states) {
+            return;
+        }
+        _.forEach(_.keys(states), function(stateMethod) {
+            if (typeof states[stateMethod] === FUNCTION) {
+                self[stateMethod] = function() {
+                    self.trigger(ON_METHOD_NOT_HANDLED, stateMethod);
+                };
+            }
+        });
     }
 
     // Attach method available in 'state'
     function _attachStateMethods(state) {
         var states = this.states[state];
+        if (!states) {
+            return;
+        }
         _.forEach(_.keys(states), function(stateMethod) {
             if (typeof states[stateMethod] === FUNCTION) {
                 this[stateMethod] = states[stateMethod];
@@ -116,15 +132,24 @@
     }
 
     function _callOnEnterOfState() {
+        // We do not want to trigger a methodNotHandled event if there is no onEnter
         if (this.onEnter) {
             this.onEnter();
         }
     }
 
     function _callOnExitOfState() {
+        // We do not want to trigger a methodNotHandled event if there is no onExit
         if (this.onExit) {
             this.onExit();
         }
+    }
+
+    function _setupMethods() {
+        var self = this;
+        _.forEach(_.keys(this.states), function(oneState) {
+            _detachStateMethods.call(self, oneState);
+        });
     }
 
     //TODO: add AMD support
