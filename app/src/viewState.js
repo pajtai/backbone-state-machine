@@ -32,9 +32,9 @@
         this.stateModel = new Backbone.Model();
         this.stateModel.set(STATES, _.keys(states));
         this.states = this.options.states;
-        this.listenTo(this.stateModel, "change:" + CURRENT_STATE, currentStateChanged.bind(this));
-        setupListeners.call(this, listeners);
-        setupMethods.call(this);
+        this.listenTo(this.stateModel, "change:" + CURRENT_STATE, _currentStateChanged.bind(this));
+        _setupListeners.call(this, listeners);
+        _setupMethods.call(this);
         // TODO: put this in a .startMachine or some such
         if (this.options.initialState) {
             this.transition(this.options.initialState);
@@ -52,12 +52,12 @@
     function transition(newState) {
         var currentState = this.stateModel.get(CURRENT_STATE);
         if (!currentState || _.contains(this.states[currentState].allowedTransitions, newState)) {
-            transitionTo.call(this, {
+            _transitionTo.call(this, {
                 current: currentState,
                 next: newState
             });
         } else {
-            failTransition.call(this, newState);
+            _failTransition.call(this, newState);
         }
     }
 
@@ -65,41 +65,45 @@
         return this.states[state].allowedTransitions;
     };
 
-    // Private methods -------------------------------------------------------------------------------------------------
-    function setupListeners(listeners) {
+    // +---------------------------------------------------------------------------------------------------------------+
+    // ++-------------------------------------------------------------------------------------------------------------++
+    // ||  Private methods: since these are local, these must be called with "apply" or "call" to attach the context  ||
+    // ++-------------------------------------------------------------------------------------------------------------++
+    // +---------------------------------------------------------------------------------------------------------------+
+    function _setupListeners(listeners) {
         var self = this;
         _.forEach(listeners, function(oneListener) {
             _.forEach(self.options.eventListeners[oneListener], function(listener) {
                 self.listenTo(self, oneListener, listener.bind(self));
             });
         });
-        this.listenTo(this, ON_ENTER, callOnEnterOfState);
-        this.listenTo(this, ON_EXIT, callOnExitOfState);
+        this.listenTo(this, ON_ENTER, _callOnEnterOfState);
+        this.listenTo(this, ON_EXIT, _callOnExitOfState);
     }
 
-    function currentStateChanged(model, currentState) {
+    function _currentStateChanged(model, currentState) {
         // args for old state, new state
         this.trigger(TRANSITION, {
             previous: model.previous(CURRENT_STATE),
             current: currentState});
     }
 
-    function transitionTo(states) {
+    function _transitionTo(states) {
         this.trigger(ON_BEGIN, TRANSITIONING);
         this.trigger(ON_EXIT, states.current);
-        detachStateMethods.call(this, states.current);
-        attachStateMethods.call(this, states.next);
+        _detachStateMethods.call(this, states.current);
+        _attachStateMethods.call(this, states.next);
         this.stateModel.set(CURRENT_STATE, states.next);
         this.trigger(ON_ENTER, states.next);
         this.trigger(ON_FINISH, TRANSITIONING);
     }
 
-    function failTransition(failedState) {
+    function _failTransition(failedState) {
         this.trigger(ON_TRANSITION_NOT_HANDLED, failedState);
     }
 
     // Remove methods available in 'state' and replace them with noops
-    function detachStateMethods(state) {
+    function _detachStateMethods(state) {
         var states = this.states[state],
             self = this;
         if (!states) {
@@ -115,7 +119,7 @@
     }
 
     // Attach method available in 'state'
-    function attachStateMethods(state) {
+    function _attachStateMethods(state) {
         var states = this.states[state];
         if (!states) {
             return;
@@ -127,24 +131,24 @@
         }.bind(this));
     }
 
-    function callOnEnterOfState() {
+    function _callOnEnterOfState() {
         // We do not want to trigger a methodNotHandled event if there is no onEnter
         if (this.onEnter) {
             this.onEnter();
         }
     }
 
-    function callOnExitOfState() {
+    function _callOnExitOfState() {
         // We do not want to trigger a methodNotHandled event if there is no onExit
         if (this.onExit) {
             this.onExit();
         }
     }
 
-    function setupMethods() {
+    function _setupMethods() {
         var self = this;
         _.forEach(_.keys(this.states), function(oneState) {
-            detachStateMethods.call(self, oneState);
+            _detachStateMethods.call(self, oneState);
         });
     }
 
