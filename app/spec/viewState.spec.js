@@ -43,14 +43,12 @@ describe( "When there is a Backbone-State-Machine,", function () {
                     ]
                 },
                 "finished" : {
-                    _onEnter : function () {
-
-                    },
                     allowedTransitions: [
                         // Final state
                     ]
                 }
             },
+            //TODO: should test that eventListeners are attached, but should not use them in the tests
             eventListeners: {
                 invalidstate: [
                     function() {
@@ -78,8 +76,13 @@ describe( "When there is a Backbone-State-Machine,", function () {
                     }
                 ],
                 onTransitionNotHandled: [
+                    function(stateName) {
+                        triggeredEvents.push({onTransitionNotHandled: stateName});
+                    }
+                ],
+                onMethodNotHandled: [
                     function(methodName) {
-                        triggeredEvents.push({onTransitionNotHandled: methodName});
+                        triggeredEvents.push({onMethodNotHandled: methodName});
                     }
                 ]
             }
@@ -173,9 +176,50 @@ describe( "When there is a Backbone-State-Machine,", function () {
                 calledMethods[0].should.deep.equal("notStarted.onExit()");
             });
 
-            it("calls the 'onEnter' method of the new state", function() {
-                calledMethods[1].should.deep.equal("started.onEnter()");
+            describe("with an 'onEnter' method", function() {
+                it("calls the 'onEnter' method of the new state", function() {
+                    calledMethods[1].should.deep.equal("started.onEnter()");
+                });
             });
+
+            describe("without an 'onEnter' method", function() {
+                var onMethodNotHandledCalled;
+
+                function onMethodNotHandledListener(info) {
+                    console.log("info: " + info);
+                    onMethodNotHandledCalled = true;
+                }
+
+                beforeEach(function() {
+                    onMethodNotHandledCalled = false;
+                    triggeredEvents = [];
+                    calledMethods = [];
+                    bbsm.listenTo(bbsm, "onMethodNotHandled", onMethodNotHandledListener);
+                    bbsm.transition("finished");
+                });
+
+                afterEach(function() {
+                    bbsm.stopListening(bbsm, "onMethodNotHandled", onMethodNotHandledListener);
+                });
+
+                it("does not fire an 'onMethodNotHandled' event", function() {
+                    onMethodNotHandledCalled.should.be.false;
+                });
+
+                describe("from a state without an 'onExit' method", function() {
+
+                    it("does not fire an 'onMethodNotHandled' event", function() {
+                        onMethodNotHandledCalled.should.be.false;
+                    });
+                    it("does not call the 'onEnter' method of the new state", function() {
+                        calledMethods.length.should.equal(0);
+                    });
+                });
+
+            });
+
+
+
         });
 
         describe("to a disallowed state", function() {
@@ -221,7 +265,12 @@ describe( "When there is a Backbone-State-Machine,", function () {
         });
 
         it("triggers a 'notHandled' event if a method from another state is called", function() {
-
+            triggeredEvents = [];
+            bbsm.getState().should.equal("notStarted");
+            bbsm.finish();
+            triggeredEvents[0].should.deep.equal({
+                onMethodNotHandled: "finish"
+            });
         });
     });
     //TODO: add separate two instances test
