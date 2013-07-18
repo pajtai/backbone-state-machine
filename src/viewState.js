@@ -3,6 +3,7 @@
     "use strict";
         // Set common strings as variables for IDE code completion
     var STATES = "states",
+        ALLOWED_TRANSITIONS = "allowedTransitions",
         CURRENT_STATE = "currentState",
         FUNCTION = "function",
         ON_BEGIN = "onBegin",
@@ -32,6 +33,7 @@
         this.stateModel = new Backbone.Model();
         this.stateModel.set(STATES, _.keys(states));
         this.states = this.options.states;
+        _setupAvailableMethods.call(this);
         this.listenTo(this.stateModel, "change:" + CURRENT_STATE, _currentStateChanged.bind(this));
         _setupListeners.call(this, listeners);
         _setupMethods.call(this);
@@ -104,15 +106,17 @@
 
     // Remove methods available in 'state' and replace them with noops
     function _detachStateMethods(state) {
-        var states = this.states[state],
+        var stateMethods,
+            states = this.states[state],
             self = this;
         if (!states) {
             return;
         }
-        _.forEach(_.keys(states), function(stateMethod) {
-            if (typeof states[stateMethod] === FUNCTION) {
-                self[stateMethod] = function() {
-                    self.trigger(ON_METHOD_NOT_HANDLED, stateMethod);
+        stateMethods = states.availableMethods;
+        _.forEach(stateMethods, function(oneStateMethod) {
+            if (typeof states[oneStateMethod] === FUNCTION) {
+                self[oneStateMethod] = function() {
+                    self.trigger(ON_METHOD_NOT_HANDLED, oneStateMethod);
                 };
             }
         });
@@ -120,28 +124,35 @@
 
     // Attach method available in 'state'
     function _attachStateMethods(state) {
-        var states = this.states[state];
+        var stateMethods,
+            states = this.states[state],
+            self = this;
         if (!states) {
             return;
         }
-        _.forEach(_.keys(states), function(stateMethod) {
-            if (typeof states[stateMethod] === FUNCTION) {
-                this[stateMethod] = states[stateMethod];
+        stateMethods = states.availableMethods;
+        _.forEach(stateMethods, function(oneStateMethod) {
+            if (typeof states[oneStateMethod] === FUNCTION) {
+                self[oneStateMethod] = states[oneStateMethod];
             }
-        }.bind(this));
+        });
     }
 
     function _callOnEnterOfState() {
         // We do not want to trigger a methodNotHandled event if there is no onEnter
-        if (this.onEnter) {
-            this.onEnter();
+        var state = this.getState(),
+            onEnter = state ? this.states[state].onEnter : false;
+        if (onEnter) {
+            onEnter();
         }
     }
 
     function _callOnExitOfState() {
         // We do not want to trigger a methodNotHandled event if there is no onExit
-        if (this.onExit) {
-            this.onExit();
+        var state = this.getState(),
+            onExit = state ? this.states[this.getState()].onExit : false;
+        if (onExit) {
+            onExit();
         }
     }
 
@@ -149,6 +160,15 @@
         var self = this;
         _.forEach(_.keys(this.states), function(oneState) {
             _detachStateMethods.call(self, oneState);
+        });
+    }
+
+    function _setupAvailableMethods() {
+        var self = this;
+        _.forEach(_.keys(this.states), function(stateName) {
+            self.states[stateName].availableMethods =
+                _.without(_.keys(self.states[stateName]),
+                    ON_ENTER, ON_EXIT, ALLOWED_TRANSITIONS);
         });
     }
 

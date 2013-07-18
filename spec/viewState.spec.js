@@ -104,8 +104,8 @@ describe( "When there is a Backbone-State-Machine,", function () {
             bbsm.getState().should.equal("notStarted");
         });
 
-        it("has its onExit method attached if supplied", function() {
-            (typeof bbsm.onExit).should.equal("function");
+        it("does not have its onExit method attached if supplied", function() {
+            (typeof bbsm.onExit).should.equal("undefined");
         });
 
     });
@@ -186,7 +186,6 @@ describe( "When there is a Backbone-State-Machine,", function () {
                 var onMethodNotHandledCalled;
 
                 function onMethodNotHandledListener(info) {
-                    console.log("info: " + info);
                     onMethodNotHandledCalled = true;
                 }
 
@@ -249,7 +248,7 @@ describe( "When there is a Backbone-State-Machine,", function () {
 
         it("gets its methods attached", function() {
 
-            var notStartedMethods = ["start", "onExit"];
+            var notStartedMethods = ["start"];
             bbsm.getState().should.equal("notStarted");
             _.forEach(notStartedMethods, function(methodName) {
                 (typeof bbsm[methodName]).should.equal("function");
