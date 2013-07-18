@@ -28,8 +28,7 @@
 
     function initialize() {
         var states = this.options.states,
-            listeners = [ON_BEGIN, ON_ENTER, ON_EXIT, ON_FINISH, ON_TRANSITION_NOT_HANDLED,
-                ON_METHOD_NOT_HANDLED];
+            listeners = _.keys(this.options.eventListeners || {});
         this.stateModel = new Backbone.Model();
         this.stateModel.set(STATES, _.keys(states));
         this.states = this.options.states;
