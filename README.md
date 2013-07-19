@@ -1,9 +1,11 @@
 # Backbone State Machine
 
+http://pajtai.github.io/backbone-state-machine
 * Tests:
 http://pajtai.github.io/backbone-state-machine/spec
 
-**This project is in progress**
+Example usage is in the spec.  
+More docs on the way.
 
 * Setup 
 
