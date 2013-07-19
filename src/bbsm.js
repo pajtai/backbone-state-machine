@@ -20,19 +20,30 @@
             states: undefined,
 
             initialize: initialize,
+            start: start,
             getStates: getStates,
             getState: getState,
             transition: transition,
             getAllowedTransitions: getAllowedTransitions
         });
 
+    // TODO: write test for instantStart
     function initialize() {
-        var states = this.options.states,
-            listeners = [ON_BEGIN, ON_ENTER, ON_EXIT, ON_FINISH, ON_TRANSITION_NOT_HANDLED,
-                ON_METHOD_NOT_HANDLED];
+        var states = this.options.states;
         this.stateModel = new Backbone.Model();
         this.stateModel.set(STATES, _.keys(states));
         this.states = this.options.states;
+        // TODO: test instantStart
+        if (this.options.instantStart) {
+            this.start();
+        }
+    }
+
+    // There is a separate start methods, so that listeners that are attached to the
+    // returned instance of a new BBSM are able to listen to all events
+    function start() {
+        var listeners = _.keys(this.options.eventListeners || {});
+        this.start = undefined;
         _setupAvailableMethods.call(this);
         this.listenTo(this.stateModel, "change:" + CURRENT_STATE, _currentStateChanged.bind(this));
         _setupListeners.call(this, listeners);
@@ -41,7 +52,7 @@
         if (this.options.initialState) {
             this.transition(this.options.initialState);
         }
-    };
+    }
 
     function getStates() {
         return this.stateModel.get(STATES);
@@ -65,7 +76,7 @@
 
     function getAllowedTransitions(state) {
         return this.states[state].allowedTransitions;
-    };
+    }
 
     // +---------------------------------------------------------------------------------------------------------------+
     // ++-------------------------------------------------------------------------------------------------------------++
@@ -165,6 +176,8 @@
 
     function _setupAvailableMethods() {
         var self = this;
+        // Remove the start method so it cannot be called again
+        this.start = undefined;
         _.forEach(_.keys(this.states), function(stateName) {
             self.states[stateName].availableMethods =
                 _.without(_.keys(self.states[stateName]),

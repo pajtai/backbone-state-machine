@@ -10,11 +10,17 @@
 <script src="../components/backbone/backbone.js"></script>
 <script src="../components/chai/chai.js"></script>
 <script src="../components/mocha/mocha.js"></script>
+<script src="../components/mocha/mocha.js"></script>
+<script src="../components/sinon/lib/sinon.js"></script>
+<script src="../components/sinon/lib/sinon/call.js"></script>
+<script src="../components/sinon/lib/sinon/spy.js"></script>
+<script src="../components/sinon/lib/sinon/mock.js"></script>
+<script src="../components/sinon-chai/lib/sinon-chai.js"></script>
 <script type="text/javascript">
     mocha.setup({ ui: 'bdd', timeout: 60000, ignoreLeaks: true });
 </script>
-<script type="text/javascript" src="../src/viewState.js"></script>
-<script type="text/javascript" src="viewState.spec.js"></script>
+<script type="text/javascript" src="../src/bbsm.js"></script>
+<script type="text/javascript" src="bbsm.spec.js"></script>
 <script type="text/javascript">
     mocha.run();
 </script>
