@@ -177,6 +177,8 @@
 
     function _setupAvailableMethods() {
         var self = this;
+        // Remove the start method so it cannot be called again
+        this.start = undefined;
         _.forEach(_.keys(this.states), function(stateName) {
             self.states[stateName].availableMethods =
                 _.without(_.keys(self.states[stateName]),
