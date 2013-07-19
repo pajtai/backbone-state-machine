@@ -4,31 +4,24 @@ describe( "A Backbone-State-Machine,", function () {
 
 
     var bbsm,
-        invalidStateTriggered,
         should = chai.should(),
         triggeredEvents,
         allEvents,
-        calledMethods,
+        initObject,
         testListener;
 
-    // Includel a stack trace when needed
     chai.Assertion.includeStack = false;
 
     beforeEach(function() {
 
-        triggeredEvents = [];
-        calledMethods = [];
-        allEvents = [],
+        allEvents = [];
         initObject = {
             initialState : "notStarted",
             states : {
                 "notStarted" : {
                     start : function () {
-                        console.log("attached start");
-                        this.transition( "started" );
                     },
                     onExit: function() {
-                        calledMethods.push("notStarted.onExit()")
                     },
                     allowedTransitions: [
                         "started"
@@ -36,10 +29,8 @@ describe( "A Backbone-State-Machine,", function () {
                 },
                 "started" : {
                     onEnter: function() {
-                        calledMethods.push("started.onEnter()")
                     },
                     finish : function () {
-                        this.transition( "finished" );
                     },
                     allowedTransitions: [
                         "finished"
@@ -66,12 +57,10 @@ describe( "A Backbone-State-Machine,", function () {
     });
 
     afterEach(function() {
-        console.log(allEvents);
-        console.log("finish");
         testListener.stopListening();
     });
 
-    it("does not get a state until .start is called", function() {
+    it("does not get a state until .start() is called", function() {
 
         should.not.exist(bbsm.getState());
     });
@@ -80,7 +69,7 @@ describe( "A Backbone-State-Machine,", function () {
        should.exist(bbsm);
     });
 
-    describe("is started using .start, and", function() {
+    describe("is started using .start(), and", function() {
 
         var originalStartMethod;
 
@@ -102,12 +91,17 @@ describe( "A Backbone-State-Machine,", function () {
 
         describe("a state", function() {
 
+            it("does not have its onEnter method attached even if supplied", function() {
+                bbsm.transition("started");
+                should.exist(initObject.states[bbsm.getState()].onEnter);
+                should.not.exist(bbsm.onEnter);
+            });
 
             it("does not have its onExit method attached even if supplied", function() {
                 var currentState = bbsm.getState();
 
                 should.exist(initObject.states[currentState].onExit);
-                (typeof bbsm.onExit).should.equal("undefined");
+                should.not.exist(bbsm.onExit);
             });
 
             describe(" - if it has a method called 'start' -", function() {
@@ -126,7 +120,7 @@ describe( "A Backbone-State-Machine,", function () {
             });
 
             it("does not get its allowedTransitions attached as a field", function() {
-                (typeof bbsm.allowedTransitions).should.equal("undefined");
+                should.not.exist(bbsm.allowedTransitions);
             });
 
             it("can be queried about its allowedTransitions using, 'getAllowedTransitions'", function() {
@@ -134,30 +128,29 @@ describe( "A Backbone-State-Machine,", function () {
             });
 
             it("triggers a 'notHandled' event if a method from another state is called", function() {
-                triggeredEvents = [];
+                allEvents = [];
                 bbsm.getState().should.equal("notStarted");
                 bbsm.finish();
-                triggeredEvents[0].should.deep.equal({
-                    onMethodNotHandled: "finish"
-                });
+                allEvents[0][0].should.equal("onMethodNotHandled");
+                allEvents[0][1].should.equal("finish");
             });
         });
 
-        describe("transitions", function() {
+        describe(".transition()", function() {
 
             beforeEach(function() {
                 allEvents = [];
+                sinon.spy(initObject.states.notStarted, "onExit");
+                sinon.spy(initObject.states.started, "onEnter");
                 bbsm.transition("started");
             });
 
-            it("using .transition", function() {
-                var originalState = bbsm.getState();
-
-                bbsm.transition(bbsm.getAllowedTransitions(originalState)[0]);
-                bbsm.getState().should.not.equal(originalState);
+            afterEach(function() {
+                initObject.states.notStarted.onExit.restore();
+                initObject.states.started.onEnter.restore();
             });
 
-            describe("and fires the following events:", function() {
+            describe("fires the following events:", function() {
 
                 it("1: triggers an 'onBegin' event with 'transitioning' as the argument", function() {
                     allEvents[0][0].should.equal("onBegin");
@@ -189,59 +182,43 @@ describe( "A Backbone-State-Machine,", function () {
             });
 
             describe("to an allowed state", function() {
-                beforeEach(function() {
-                    triggeredEvents = [];
-                    calledMethods = [];
-                    bbsm.transition("started");
-                });
 
-                it("does so", function() {
-                    bbsm.getState().should.equal("started");
+                it("changes the state", function() {
+                    var originalState = bbsm.getState();
+
+                    bbsm.transition(bbsm.getAllowedTransitions(originalState)[0]);
+                    bbsm.getState().should.not.equal(originalState);
                 });
 
                 it("calls the 'onExit' method of the old state", function() {
-                    calledMethods[0].should.deep.equal("notStarted.onExit()");
+                   initObject.states.notStarted.onExit.should.have.been.called;
                 });
 
-                describe("with an 'onEnter' method", function() {
-                    it("calls the 'onEnter' method of the new state", function() {
-                        calledMethods[1].should.deep.equal("started.onEnter()");
-                    });
+                it("calls the 'onEnter' method of the new state", function() {
+                    initObject.states.started.onEnter.should.have.been.called;
                 });
 
                 describe("without an 'onEnter' method", function() {
-                    var onMethodNotHandledCalled;
-
-                    function onMethodNotHandledListener(info) {
-                        onMethodNotHandledCalled = true;
-                    }
-
                     beforeEach(function() {
-                        onMethodNotHandledCalled = false;
-                        triggeredEvents = [];
-                        calledMethods = [];
-                        bbsm.listenTo(bbsm, "onMethodNotHandled", onMethodNotHandledListener);
+
+                        allEvents = [];
                         bbsm.transition("finished");
                     });
 
-                    afterEach(function() {
-                        bbsm.stopListening(bbsm, "onMethodNotHandled", onMethodNotHandledListener);
+                    it("does not fire an 'onMethodNotHandled' event", function() {
+                        _.forEach(allEvents, function(event) {
+                            event[0].should.not.equal("onMethodNotHandled");
+                        });
                     });
+                });
+
+                describe("from a state without an 'onExit' method", function() {
 
                     it("does not fire an 'onMethodNotHandled' event", function() {
-                        onMethodNotHandledCalled.should.be.false;
-                    });
-
-                    describe("from a state without an 'onExit' method", function() {
-
-                        it("does not fire an 'onMethodNotHandled' event", function() {
-                            onMethodNotHandledCalled.should.be.false;
-                        });
-                        it("does not call the 'onEnter' method of the new state", function() {
-                            calledMethods.length.should.equal(0);
+                        _.forEach(allEvents, function(event) {
+                            event[0].should.not.equal("onMethodNotHandled");
                         });
                     });
-
                 });
 
 
@@ -250,19 +227,22 @@ describe( "A Backbone-State-Machine,", function () {
 
             describe("to a disallowed state", function() {
 
+                var originalState;
+
                 beforeEach(function() {
-                    triggeredEvents = [];
+                    allEvents = [];
+                    originalState = bbsm.getState();
                     bbsm.transition("blah");
                 });
 
                 it("does not change state", function() {
-                    bbsm.getState().should.not.to.equal("blah");
+                    bbsm.getState().should.equal(originalState);
+
                 });
 
-                it("triggers an onTransitionNotHandled event", function() {
-                    triggeredEvents[0].should.deep.equal({
-                        onTransitionNotHandled: "blah"
-                    });
+                it("triggers an onTransitionNotHandled event with the failed state as an argument", function() {
+                    allEvents[0][0].should.equal("onTransitionNotHandled");
+                    allEvents[0][1].should.equal("blah");
                 });
 
             });

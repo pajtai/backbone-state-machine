@@ -42,7 +42,6 @@
     // There is a separate start methods, so that listeners that are attached to the
     // returned instance of a new BBSM are able to listen to all events
     function start() {
-        console.log("original start")
         var listeners = _.keys(this.options.eventListeners || {});
         this.start = undefined;
         _setupAvailableMethods.call(this);
