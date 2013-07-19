@@ -18,9 +18,8 @@ describe( "A Backbone-State-Machine,", function () {
 
         triggeredEvents = [];
         calledMethods = [];
-        allEvents = [];
-
-        bbsm = new BBSM({
+        allEvents = [],
+        initObject = {
             initialState : "notStarted",
             states : {
                 "notStarted" : {
@@ -54,43 +53,10 @@ describe( "A Backbone-State-Machine,", function () {
             },
             //TODO: should test that eventListeners are attached, but should not use them in the tests
             eventListeners: {
-                invalidstate: [
-                    function() {
-                        invalidStateTriggered = true;
-                    }
-                ],
-                onBegin: [
-                    function(state) {
-                        triggeredEvents.push({onBegin: state});
-                    }
-                ],
-                onEnter: [
-                    function(state) {
-                        triggeredEvents.push({onEnter: state});
-                    }
-                ],
-                onExit: [
-                    function(state) {
-                        triggeredEvents.push({onExit: state});
-                    }
-                ],
-                onFinish: [
-                    function(state) {
-                        triggeredEvents.push({onFinish: state});
-                    }
-                ],
-                onTransitionNotHandled: [
-                    function(stateName) {
-                        triggeredEvents.push({onTransitionNotHandled: stateName});
-                    }
-                ],
-                onMethodNotHandled: [
-                    function(methodName) {
-                        triggeredEvents.push({onMethodNotHandled: methodName});
-                    }
-                ]
             }
-        });
+        };
+
+        bbsm = new BBSM(initObject);
 
         testListener = {};
         _.extend(testListener, Backbone.Events);
@@ -114,54 +80,111 @@ describe( "A Backbone-State-Machine,", function () {
        should.exist(bbsm);
     });
 
-    describe("is started using .start", function() {
+    describe("is started using .start, and", function() {
+
+        var originalStartMethod;
+
+        beforeEach(function() {
+            originalStartMethod = bbsm.start;
+            bbsm.start();
+        });
+
         it("stores the states from the passed in objects .states", function() {
             bbsm.getStates().should.deep.equal(["notStarted", "started", "finished"]);
         });
 
-        describe("the initial state", function() {
+        describe("has an initial state", function() {
 
-            it("is set", function() {
+            it("that is set", function() {
                 bbsm.getState().should.equal("notStarted");
             });
+        });
 
-            it("does not have its onExit method attached if supplied", function() {
+        describe("a state", function() {
+
+
+            it("does not have its onExit method attached even if supplied", function() {
+                var currentState = bbsm.getState();
+
+                should.exist(initObject.states[currentState].onExit);
                 (typeof bbsm.onExit).should.equal("undefined");
             });
 
+            describe(" - if it has a method called 'start' -", function() {
+                it("will replace bbsm.start with its own method", function() {
+                    bbsm.start.should.not.equal(originalStartMethod);
+                });
+            });
+
+            it("gets its methods attached", function() {
+
+                var notStartedMethods = ["start"];
+                bbsm.getState().should.equal("notStarted");
+                _.forEach(notStartedMethods, function(methodName) {
+                    (typeof bbsm[methodName]).should.equal("function");
+                });
+            });
+
+            it("does not get its allowedTransitions attached as a field", function() {
+                (typeof bbsm.allowedTransitions).should.equal("undefined");
+            });
+
+            it("can be queried about its allowedTransitions using, 'getAllowedTransitions'", function() {
+                bbsm.getAllowedTransitions("started").should.deep.equal(["finished"]);
+            });
+
+            it("triggers a 'notHandled' event if a method from another state is called", function() {
+                triggeredEvents = [];
+                bbsm.getState().should.equal("notStarted");
+                bbsm.finish();
+                triggeredEvents[0].should.deep.equal({
+                    onMethodNotHandled: "finish"
+                });
+            });
         });
 
-        describe("transitions, and it", function() {
-
-            var transitioned;
+        describe("transitions", function() {
 
             beforeEach(function() {
-
-                bbsm.listenTo(bbsm, "transition", transition);
-                transitioned = false;
-
-                function transition(description) {
-                    transitioned = description;
-                    triggeredEvents.push(description);
-                }
-            });
-
-            it("first triggers an 'onBegin' event with 'transitioning' as the argument", function() {
-                console.log("middle");
-                allEvents.should.equal("onBegin");
-                triggeredEvents[0].should.deep.equal({onBegin: 'transitioning'});
-            });
-
-            it("lastly triggers a 'onFinish' event with 'transtioning' as the argument", function() {
-                triggeredEvents[triggeredEvents.length - 1].should.deep.equal({onFinish: 'transitioning'});
-            });
-
-            it("fires an event that includes the previous and current states in the payload", function() {
-                transitioned.should.be.false;
+                allEvents = [];
                 bbsm.transition("started");
-                transitioned.should.deep.equal({
-                    previous: "notStarted",
-                    current: "started"
+            });
+
+            it("using .transition", function() {
+                var originalState = bbsm.getState();
+
+                bbsm.transition(bbsm.getAllowedTransitions(originalState)[0]);
+                bbsm.getState().should.not.equal(originalState);
+            });
+
+            describe("and fires the following events:", function() {
+
+                it("1: triggers an 'onBegin' event with 'transitioning' as the argument", function() {
+                    allEvents[0][0].should.equal("onBegin");
+                    allEvents[0][1].should.equal("transitioning");
+                });
+
+                it("2: triggers an 'onExit' event with the previous state as the argument", function() {
+                    allEvents[1][0].should.equal("onExit");
+                    allEvents[1][1].should.equal("notStarted");
+                });
+
+                it("3: triggers a 'transition' event describing the two states involved", function() {
+                    allEvents[2][0].should.equal("transition");
+                    allEvents[2][1].should.deep.equal({
+                        previous: "notStarted",
+                        current: "started"
+                    });
+                });
+
+                it("4: triggers an 'onEnter' event with the new state as the argument", function() {
+                    allEvents[3][0].should.equal("onEnter");
+                    allEvents[3][1].should.equal("started");
+                });
+
+                it("5: trigger an 'onFinish' event with transitioning as the argument", function() {
+                    allEvents[4][0].should.equal("onFinish");
+                    allEvents[4][1].should.equal("transitioning");
                 });
             });
 
@@ -174,25 +197,6 @@ describe( "A Backbone-State-Machine,", function () {
 
                 it("does so", function() {
                     bbsm.getState().should.equal("started");
-                });
-
-                it("secondly fires an 'onExit' describing the state being exited", function() {
-                    triggeredEvents[1].should.deep.equal({
-                        onExit: "notStarted"
-                    });
-                });
-
-                it("thirdly fires a 'change' method describing the states transitioned from and to", function() {
-                    triggeredEvents[2].should.deep.equal({
-                        previous: "notStarted",
-                        current: "started"
-                    });
-                });
-
-                it("fourthly fires an 'onEnter' describing the state being entered", function() {
-                    triggeredEvents[3].should.deep.equal({
-                        onEnter: "started"
-                    });
                 });
 
                 it("calls the 'onExit' method of the old state", function() {
@@ -265,35 +269,6 @@ describe( "A Backbone-State-Machine,", function () {
 
             // TODO: test calling unhandled method is a noop and not an error
             // TODO: test calling unhandled onEnter and onExit
-        });
-
-        describe("a state", function() {
-
-            it("gets its methods attached", function() {
-
-                var notStartedMethods = ["start"];
-                bbsm.getState().should.equal("notStarted");
-                _.forEach(notStartedMethods, function(methodName) {
-                    (typeof bbsm[methodName]).should.equal("function");
-                });
-            });
-
-            it("does not get its allowedTransitions attached as a field", function() {
-                (typeof bbsm.allowedTransitions).should.equal("undefined");
-            });
-
-            it("can be queried about its allowedTransitions using, 'getAllowedTransitions'", function() {
-                bbsm.getAllowedTransitions("started").should.deep.equal(["finished"]);
-            });
-
-            it("triggers a 'notHandled' event if a method from another state is called", function() {
-                triggeredEvents = [];
-                bbsm.getState().should.equal("notStarted");
-                bbsm.finish();
-                triggeredEvents[0].should.deep.equal({
-                    onMethodNotHandled: "finish"
-                });
-            });
         });
         //TODO: add separate two instances test
     });
