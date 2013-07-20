@@ -5,7 +5,6 @@ describe( "A Backbone-State-Machine,", function () {
 
     var bbsm,
         should = chai.should(),
-        triggeredEvents,
         allEvents,
         initObject,
         testListener;
@@ -20,6 +19,7 @@ describe( "A Backbone-State-Machine,", function () {
             states : {
                 "notStarted" : {
                     start : function () {
+                        console.log("---- called ----");
                     },
                     onExit: function() {
                     },
@@ -47,6 +47,7 @@ describe( "A Backbone-State-Machine,", function () {
             }
         };
 
+        sinon.spy(initObject.states.notStarted, "start");
         bbsm = new BBSM(initObject);
 
         testListener = {};
@@ -58,6 +59,7 @@ describe( "A Backbone-State-Machine,", function () {
 
     afterEach(function() {
         testListener.stopListening();
+        initObject.states.notStarted.start.restore();
     });
 
     it("does not get a state until .start() is called", function() {
@@ -248,7 +250,39 @@ describe( "A Backbone-State-Machine,", function () {
             });
 
             // TODO: test calling unhandled method is a noop and not an error
-            // TODO: test calling unhandled onEnter and onExit
+        });
+
+        describe("methods", function() {
+
+            describe("that are in the current state", function() {
+                it("can be called", function() {
+                    initObject.states.notStarted.start.should.not.have.been.called;
+                    bbsm.start();
+                    initObject.states.notStarted.start.should.have.been.called;
+                });
+            });
+
+            describe("that are not in the current state (but in another state)", function() {
+                beforeEach(function() {
+                    bbsm.transition("started");
+                    allEvents = [];
+                });
+                it("exist", function() {
+                    should.exist(bbsm.start);
+                });
+                it("cannot be successfully called", function() {
+                    // 'started' state has not 'start' method
+                    bbsm.transition("started");
+                    initObject.states.notStarted.start.should.not.have.been.called;
+                    bbsm.start();
+                    initObject.states.notStarted.start.should.not.have.been.called;
+                });
+                it("trigger an onMethodNotHandled event with the method names as the argument", function() {
+                    bbsm.start();
+                    allEvents[0][0].should.equal("onMethodNotHandled");
+                    allEvents[0][1].should.equal("start");
+                });
+            });
         });
         //TODO: add separate two instances test
     });
