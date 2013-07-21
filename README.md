@@ -8,7 +8,7 @@ BBSM allows you to define a number of states, the methods available on each stat
 the states you are allowed to transition to from each of the defined states.
 
 BBSM fires events when transitioning and to warn of unhandled transitions and unhandled
-method calls. The fired events are summarized [here][events].
+method calls. The fired events are summarized [Events][].
 
 http://pajtai.github.io/backbone-state-machine
 
