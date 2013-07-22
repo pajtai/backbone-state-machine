@@ -15,6 +15,12 @@ http://pajtai.github.io/backbone-state-machine
 * Tests:
 http://pajtai.github.io/backbone-state-machine/spec
 
+## Installation
+
+```
+bower install backbone-state-machine
+```
+
 ## Dev Setup
 
 ```
