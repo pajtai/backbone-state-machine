@@ -140,3 +140,7 @@ it exists.
 
 The `transition` even is triggred by a `change` listener attached to the `.stateModel`
 of the BBSM instance.
+
+## Release Notes:
+
+* 2013-07-22 - 0.0.3
