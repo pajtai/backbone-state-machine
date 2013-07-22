@@ -285,5 +285,6 @@ describe( "A Backbone-State-Machine,", function () {
             });
         });
         //TODO: add separate two instances test
+        //TODO: add spec showing correct binding of this in state descriptions
     });
 });
