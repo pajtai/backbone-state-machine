@@ -39,10 +39,10 @@ var initObject = { ... }
 bbsm.start();
 
 // Transition to other allowed states
-bbsm.transition("playing");
+bbsm.transition("exampleStatw");
 
 // Call methods in the state on the instance directly
-bbsm.getDuration();
+bbsm.exampleMethod();
 ```
 
 ### Step by Step
@@ -53,7 +53,7 @@ An initializing object is used to setup the state machine:
 myStateMachine = new BBSM(initObject);
 ```
 
-The initialization object contains the initial state referred to as a string, a states object
+The initialization object contains the initial state referred to as a string, a 'states' object
 that describes each state as a field, and an array of event listeners you want to attach to your view.
 
 ```javascript
@@ -72,11 +72,11 @@ var initObject = {
 ```
 
 The intiial state is optional, and it transitioned to upon calling `bbsmInstance.start()`.
-If not provided, the initial state will not exist (it will be undefined), but you can
+If not provided, the initial state will not exist (it will be `undefined`), but you can
 then transition to any state using `.transition`.
 
 The state descriptions contain available methods - or references to them -
-for each state, and an array of states that can be transitioned to from the state being
+for each state, and an array of states as strings that can be transitioned to from the state being
 described:
 
 ```javascript
@@ -104,26 +104,26 @@ calling of the correct method is handled by BBSM.
 Upon a succesfull transition the following events are fired - in this order - on the instance of the State
 Machine in this order:
 
-1.
+1:
 ```javascript
 bbsmInstance.trigger('onBegin', 'transitioning')
 ```
-1.
+2:
 ```javascript
 bbsmInstance.trigger('onExit', [the old state as a string])
 ```
-1.
+3:
 ```javascript
 bbsmInstance.trigger('transition', {
     previous: [the old state as a string],
     current: [the new state as a string]
 }
 ```
-1.
+4:
 ```javascript
 bbsmInstance.trigger('onEnter', [the new state as a string])
 ```
-1.
+5:
 ```javascript
 bbsmInstance.trigger('onFinish', 'transitioning')
 ```
