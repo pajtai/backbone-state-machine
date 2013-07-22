@@ -25,6 +25,28 @@ grunt server
 
 ## Usage
 
+### Summary
+
+```javascript
+// First create and instance
+var initObject = { ... }
+    bbsm = new BBSM(initObject);
+
+// Then do any additional setup work (e.g. setting custom listeners)
+...
+
+// Start the State Machine
+bbsm.start();
+
+// Transition to other allowed states
+bbsm.transition("playing");
+
+// Call methods in the state on the instance directly
+bbsm.getDuration();
+```
+
+### Step by Step
+
 An initializing object is used to setup the state machine:
 
 ```javascript
@@ -48,6 +70,10 @@ var initObject = {
     ]
 }
 ```
+
+The intiial state is optional, and it transitioned to upon calling `bbsmInstance.start()`.
+If not provided, the initial state will not exist (it will be undefined), but you can
+then transition to any state using `.transition`.
 
 The state descriptions contain available methods - or references to them -
 for each state, and an array of states that can be transitioned to from the state being

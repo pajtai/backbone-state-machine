@@ -19,7 +19,6 @@ describe( "A Backbone-State-Machine,", function () {
             states : {
                 "notStarted" : {
                     start : function () {
-                        console.log("---- called ----");
                     },
                     onExit: function() {
                     },
@@ -86,8 +85,20 @@ describe( "A Backbone-State-Machine,", function () {
 
         describe("has an initial state", function() {
 
-            it("that is set", function() {
+            it("that is set if provided", function() {
                 bbsm.getState().should.equal("notStarted");
+            });
+
+            it("that is 'undefined' if not provided", function() {
+                var bbsm2 = new BBSM({
+                    states: {
+                        first: {
+
+                        }
+                    }
+                });
+                bbsm2.start();
+                should.not.exist(bbsm2.getState());
             });
         });
 
@@ -260,6 +271,25 @@ describe( "A Backbone-State-Machine,", function () {
                     bbsm.start();
                     initObject.states.notStarted.start.should.have.been.called;
                 });
+                it("use the proper context", function() {
+
+                    // Setup a BBSM example that relies on context
+                    var bbsm2 = new BBSM({
+                        initialState: "first",
+                        states: {
+                            first: {
+                                testMethod: function() {
+                                    this.testField = this.testField + 1;
+                                }
+                            }
+                        }
+                    });
+
+                    bbsm2.start();
+                    bbsm2.testField = 2;
+                    bbsm2.testMethod();
+                    bbsm2.testField.should.equal(3);
+                });
             });
 
             describe("that are not in the current state (but in another state)", function() {
@@ -284,7 +314,5 @@ describe( "A Backbone-State-Machine,", function () {
                 });
             });
         });
-        //TODO: add separate two instances test
-        //TODO: add spec showing correct binding of this in state descriptions
     });
 });
