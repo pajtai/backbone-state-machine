@@ -14,6 +14,20 @@
         ON_TRANSITION_NOT_HANDLED = "onTransitionNotHandled",
         TRANSITIONING = "transitioning",
         TRANSITION = "transition",
+        BBSM,
+        _,
+        Backbone;
+console.log("log log lgo");
+        // RequireJS support
+        if ( FUNCTION === typeof define && define.amd && FUNCTION === typeof require) {
+            console.log("!!!!!!");
+            _ = require("underscore");
+            Backbone = require("backbone");
+        } else {
+            // or grab from the global scope
+            _ = window._;
+            Backbone = window.Backbone;
+        }
         BBSM = Backbone.View.extend({
 
             stateModel: undefined,
@@ -185,6 +199,10 @@
         });
     }
 
+    if ( FUNCTION === typeof define && define.amd ) {
+
+        define( "bbsm", ['underscore', 'backbone'], function () { return BBSM; } );
+    }
     //TODO: add AMD support
     window.BBSM = BBSM;
 }());
