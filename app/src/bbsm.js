@@ -14,6 +14,18 @@
         ON_TRANSITION_NOT_HANDLED = "onTransitionNotHandled",
         TRANSITIONING = "transitioning",
         TRANSITION = "transition",
+        BBSM,
+        _,
+        Backbone;
+        // RequireJS support
+        if ( FUNCTION === typeof define && define.amd && FUNCTION === typeof require) {
+            _ = require("underscore");
+            Backbone = require("backbone");
+        } else {
+            // or grab from the global scope
+            _ = window._;
+            Backbone = window.Backbone;
+        }
         BBSM = Backbone.View.extend({
 
             stateModel: undefined,
@@ -21,9 +33,9 @@
 
             initialize: initialize,
             start: start,
-            getStates: getStates,
-            getState: getState,
             transition: transition,
+            getState: getCurrentState,
+            getStates: getStates,
             getAllowedTransitions: getAllowedTransitions
         });
 
@@ -52,14 +64,7 @@
         if (this.options.initialState) {
             this.transition(this.options.initialState);
         }
-    }
-
-    function getStates() {
-        return this.stateModel.get(STATES);
-    }
-
-    function getState() {
-        return this.stateModel.get(CURRENT_STATE);
+        return this;
     }
 
     function transition(newState) {
@@ -72,6 +77,15 @@
         } else {
             _failTransition.call(this, newState);
         }
+        return this;
+    }
+
+    function getCurrentState() {
+        return this.stateModel.get(CURRENT_STATE);
+    }
+
+    function getStates() {
+        return this.stateModel.get(STATES);
     }
 
     function getAllowedTransitions(state) {
@@ -185,6 +199,10 @@
         });
     }
 
+    if ( FUNCTION === typeof define && define.amd ) {
+
+        define( "bbsm", ['underscore', 'backbone'], function () { return BBSM; } );
+    }
     //TODO: add AMD support
     window.BBSM = BBSM;
 }());

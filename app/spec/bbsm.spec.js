@@ -4,6 +4,7 @@ describe( "A Backbone-State-Machine,", function () {
 
 
     var bbsm,
+        TestBBSM,
         should = chai.should(),
         allEvents,
         initObject,
@@ -47,7 +48,14 @@ describe( "A Backbone-State-Machine,", function () {
         };
 
         sinon.spy(initObject.states.notStarted, "start");
-        bbsm = new BBSM(initObject);
+
+        // Setup a semi realistic use case with an overridden init method
+        TestBBSM = BBSM.extend({
+            initialize: function() {
+                TestBBSM.__super__.initialize.apply(this, arguments);
+            }
+        });
+        bbsm = new TestBBSM(initObject);
 
         testListener = {};
         _.extend(testListener, Backbone.Events);
