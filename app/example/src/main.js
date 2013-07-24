@@ -26,13 +26,22 @@ require.config({
         jquery: '../../components/jquery/jquery',
         underscore: '../../components/underscore/underscore',
         backbone: '../../components/backbone/backbone',
-        bbsm: '../../src/bbsm'
+        bbsm: '../../src/bbsm',
+        text: '../../components/requirejs-text/text',
+        elevator: 'views/elevator'
     }
 });
 
 require([
-    'bbsm'
-], function (BBSM) {
+    'elevator'
+], function (Elevator) {
 
-    console.log(typeof BBSM);
+    new Elevator({
+        initialState: "lobby",
+        states: {
+            lobby: {
+
+            }
+        }
+    }).render();
 });

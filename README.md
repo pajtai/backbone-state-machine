@@ -33,15 +33,33 @@ grunt server
 
 ### Summary
 
+Step 1: Extend BBSM
+
 ```javascript
-// First create and instance
+var MyBBSM = BBSM.extend({
+    initialize: function() {
+        // Call super
+        MyBBSM.initialize.__super__.initialize.apply(this, arguments);
+        // Then customize
+        // ...
+    },
+    render: function() {
+    ...
+    ...
+});
+```
+
+Step 2: Start the State Machine
+
+```javascript
+// First create an instance
 var initObject = { ... }
-    bbsm = new BBSM(initObject);
+    bbsm = new MyBBSM(initObject);
 
 // Then do any additional setup work (e.g. setting custom listeners)
 ...
 
-// Start the State Machine
+// Finally, start the State Machine
 bbsm.start();
 
 // Transition to other allowed states
@@ -53,10 +71,41 @@ bbsm.exampleMethod();
 
 ### Step by Step
 
+You can use BBSM as is, but you probably want to - at a minimum - add your own render
+method. To customize BBSM, you have to first extend it, then initialized it, and finally
+start the state machine.
+
+#### Extending BBSM
+
+BBSM can be extended like any other view with the important restriction that `.initialize`
+must be called on BBSM itself. This can be done using either the `prototype` or Backbone's
+convenience `__super__`.
+
+If you do not override initialize, then you don't have to worry about this.
+
+Below is an example using `__super__` and an override of `.initialize`
+
+```javascript
+var CustomBBSM = BBSM.extend({
+    el: "#customEl",
+    initialize: function() {
+        CustomBBSM.__super__.initialize.apply(this, arguments);
+        // Now you can cusomize initialize here
+        ...
+    },
+    render: function() {
+        ...
+    },
+    ...
+});
+```
+
+#### Initializing and starting BBSM
+
 An initializing object is used to setup the state machine:
 
 ```javascript
-myStateMachine = new BBSM(initObject);
+myStateMachine = new CustomBBSM(initObject);
 ```
 
 The initialization object contains the initial state referred to as a string, a 'states' object
@@ -97,7 +146,7 @@ var state1Description = {
 }
 ```
 
-## Entering and Exiting States
+### Entering and Exiting States
 
 When entering a state, its `onEnter` method will be called if it exists. When exiting a
 state, its `onExit` method will be called if it exists.
@@ -105,7 +154,7 @@ state, its `onExit` method will be called if it exists.
 The methods are automatically triggered by the `onEnter` and `onExit` events, and the
 calling of the correct method is handled by BBSM.
 
-## Events
+### Events
 
 Upon a succesfull transition the following events are fired - in this order - on the instance of the State
 Machine in this order:
@@ -143,4 +192,5 @@ of the BBSM instance.
 
 ## Release Notes:
 
+* 2013-07-24 -
 * 2013-07-22 - 0.0.3
