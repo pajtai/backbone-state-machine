@@ -33,9 +33,9 @@
 
             initialize: initialize,
             start: start,
-            getStates: getStates,
-            getState: getState,
             transition: transition,
+            getState: getCurrentState,
+            getStates: getStates,
             getAllowedTransitions: getAllowedTransitions
         });
 
@@ -64,14 +64,7 @@
         if (this.options.initialState) {
             this.transition(this.options.initialState);
         }
-    }
-
-    function getStates() {
-        return this.stateModel.get(STATES);
-    }
-
-    function getState() {
-        return this.stateModel.get(CURRENT_STATE);
+        return this;
     }
 
     function transition(newState) {
@@ -84,6 +77,15 @@
         } else {
             _failTransition.call(this, newState);
         }
+        return this;
+    }
+
+    function getCurrentState() {
+        return this.stateModel.get(CURRENT_STATE);
+    }
+
+    function getStates() {
+        return this.stateModel.get(STATES);
     }
 
     function getAllowedTransitions(state) {

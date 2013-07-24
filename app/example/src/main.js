@@ -36,12 +36,42 @@ require([
     'elevator'
 ], function (Elevator) {
 
-    new Elevator({
-        initialState: "lobby",
+    var WAITING_WITH_DOORS_OPEN = "waitingWithDoorsOpen",
+        DOORS_CLOSING = "doorsClosing",
+        DOORS_OPENING = "doorsOpening",
+        MOVING_UP = "movingUp",
+        MOVING_DOWN = "movingDown",
+        elevator = new Elevator({
+        initialState: "waitingWithDoorsOpen",
         states: {
-            lobby: {
-
+            waitingWithDoorsOpen: {
+                allowedTransitions: [
+                    DOORS_CLOSING
+                ]
+            },
+            doorsClosing: {
+                allowedTransitions: [
+                    DOORS_OPENING, MOVING_UP, MOVING_DOWN
+                ]
+            },
+            doorsOpening: {
+                allowedTransitions: [
+                    WAITING_WITH_DOORS_OPEN
+                ]
+            },
+            movingUp: {
+                allowedTransitions: [
+                    DOORS_OPENING
+                ]
+            },
+            movingDown: {
+                allowedTransitions: [
+                    DOORS_OPENING
+                ]
             }
         }
-    }).render();
+    });
+
+    elevator.start().render();
+
 });

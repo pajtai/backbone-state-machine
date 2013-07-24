@@ -7,11 +7,10 @@ define([
         el: "#elevator",
         template: _.template(elevatorTemplate),
         render: function() {
-            var html = this.template({currentState: "test"});
+            var html = this.template({currentState: this.getState()});
             this.$el.html(html);
         }
     });
 
-    console.log("return");
     return Elevator;
 });
