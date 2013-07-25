@@ -16,14 +16,15 @@
     <div class="large-12 columns">
         <h1>Elevator Example</h1>
         <p>Backbone State Machine</p>
-        <ul class="button-group round large-centered">
-            <li><a href="/" class="small button">Home</a></li>
-            <li><a href="/spec" class="small button">Tests</a></li>
-            <li><a href="/example" class="small button">Example</a></li>
-            <li><a href="/example" class="small button">Readme</a></li>
+        <ul class="button-group round even-4">
+            <li><a href="../" class="small button">Home</a></li>
+            <li><a href="../spec" class="small button">Tests</a></li>
+            <li><a href="../example" class="small button">Example</a></li>
+            <li><a href="https://github.com/pajtai/backbone-state-machine/blob/readme/README.md" class="small button">Readme</a></li>
         </ul>
     </div>
 </div>
+
 <br/>
 <div class="panel row">
     <div id="elevator-shaft" class="large-4 columns">
@@ -32,9 +33,9 @@
         </div>
     </div>
     <div id="floors" class="large-8 columns">
-        <h4>Floor 3</h4>
-        <h4>Floor 2</h4>
-        <h4>Lobby</h4>
+        <h4>Floor 3 - Down</h4>
+        <h4>Floor 2 - Up : Down</h4>
+        <h4 id="floor1"></h4>
     </div>
 </div>
 <script data-main="src/main" src="../components/requirejs/require.js"></script>
