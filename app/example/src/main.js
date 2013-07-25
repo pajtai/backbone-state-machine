@@ -28,19 +28,24 @@ require.config({
         backbone: '../../components/backbone/backbone',
         bbsm: '../../src/bbsm',
         text: '../../components/requirejs-text/text',
-        elevator: 'views/elevator'
+        elevator: 'views/elevator',
+        floor: 'views/floor'
     }
 });
 
 require([
-    'elevator'
-], function (Elevator) {
+    'elevator',
+    'floor'
+], function (Elevator, Floor) {
 
     var WAITING_WITH_DOORS_OPEN = "waitingWithDoorsOpen",
         DOORS_CLOSING = "doorsClosing",
         DOORS_OPENING = "doorsOpening",
         MOVING_UP = "movingUp",
         MOVING_DOWN = "movingDown",
+        UP = Floor.prototype.masks.UP_MASK,
+        DOWN = Floor.prototype.masks.DOWN_MASK,
+        floor1, floor2, floor3,
         elevator = new Elevator({
         initialState: "waitingWithDoorsOpen",
         states: {
@@ -74,4 +79,11 @@ require([
 
     elevator.start().render();
 
+    floor1 = new Floor({
+        floor: 1,
+        buttons: UP,
+        el: "#floor1"
+    });
+
+    floor1.render();
 });
