@@ -8,17 +8,21 @@ define([
         BUTTON_QUEUE = "buttonQueue",
         Building = Backbone.View.extend({
             el: "#floors",
+            // Variables we will define later. Listed for easy reference.
             numberOfFloors: undefined,
             elevator: undefined,
+            buttonPressedCollection: undefined,
+            //
             initialize: initialize,
             render: render,
-            installElevator: installElevator,
             updateButtonPressedQueue: updateButtonPressedQueue,
             model: Backbone.Model
     });
 
     function initialize() {
         this.numberOfFloors = this.options.numberOfFloors;
+        this.elevator = this.options.elevator;
+        this.buttonPressedCollection = this.options.buttonPressedCollection;
         this.model = new this.model({
             buttonQueue: []
         });
@@ -53,22 +57,17 @@ define([
     }
 
     // When called this method has a context bound that includes the floor and instance
-    function updateButtonPressedQueue() {
-        var buttonMask = arguments[1],
-            self = this.self;
+    function updateButtonPressedQueue(model, buttonMask) {
+        var self = this.self,
+            previousButtonMask = model.previous("buttonsPressed");
 
-        self.elevator.pressedButtonQueue.push(
+        self.buttonPressedCollection.add(
             {
                 floor: this.floor,
-                buttonsPressed: buttonMask
+                // Check what changed to determine the button that was pressed
+                buttonsPressed: buttonMask ^ previousButtonMask
             }
         );
-        console.log(self.elevator.pressedButtonQueue);
-    }
-
-    function installElevator(elevator) {
-        this.elevator = elevator;
-
     }
 
     return Building;

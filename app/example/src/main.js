@@ -30,14 +30,16 @@ require.config({
         text: '../../components/requirejs-text/text',
         elevator: 'views/elevator',
         floor: 'views/floor',
-        building: 'views/building'
+        building: 'views/building',
+        buttonPressedCollection: 'models/buttonPressedCollection'
     }
 });
 
 require([
     'elevator',
-    'building'
-], function (Elevator, Building) {
+    'building',
+    'buttonPressedCollection'
+], function (Elevator, Building, ButtonPressedCollection) {
 
     var WAITING_WITH_DOORS_OPEN = "waitingWithDoorsOpen",
         DOORS_CLOSING = "doorsClosing",
@@ -45,43 +47,50 @@ require([
         MOVING_UP = "movingUp",
         MOVING_DOWN = "movingDown",
         building,
+        buttonPressedCollection = new ButtonPressedCollection(),
         elevator = new Elevator({
-        initialState: "waitingWithDoorsOpen",
-        states: {
-            waitingWithDoorsOpen: {
-                allowedTransitions: [
-                    DOORS_CLOSING
-                ]
-            },
-            doorsClosing: {
-                allowedTransitions: [
-                    DOORS_OPENING, MOVING_UP, MOVING_DOWN
-                ]
-            },
-            doorsOpening: {
-                allowedTransitions: [
-                    WAITING_WITH_DOORS_OPEN
-                ]
-            },
-            movingUp: {
-                allowedTransitions: [
-                    DOORS_OPENING
-                ]
-            },
-            movingDown: {
-                allowedTransitions: [
-                    DOORS_OPENING
-                ]
+            buttonPressedCollection: buttonPressedCollection,
+            initialState: "waitingWithDoorsOpen",
+            states: {
+                waitingWithDoorsOpen: {
+                    beginPickingPeopleUp: function() {
+                        console.log("!!!!");
+                        this.beginPickingPeopleUp();
+                    },
+                    allowedTransitions: [
+                        DOORS_CLOSING
+                    ]
+                },
+                doorsClosing: {
+                    allowedTransitions: [
+                        DOORS_OPENING, MOVING_UP, MOVING_DOWN
+                    ]
+                },
+                doorsOpening: {
+                    allowedTransitions: [
+                        WAITING_WITH_DOORS_OPEN
+                    ]
+                },
+                movingUp: {
+                    allowedTransitions: [
+                        DOORS_OPENING
+                    ]
+                },
+                movingDown: {
+                    allowedTransitions: [
+                        DOORS_OPENING
+                    ]
+                }
             }
-        }
     });
 
     elevator.start().render();
 
     building = new Building({
-        numberOfFloors: 5
+        numberOfFloors: 5,
+        elevator: elevator,
+        buttonPressedCollection: buttonPressedCollection
     });
 
-    building.installElevator(elevator);
     building.render();
 });
