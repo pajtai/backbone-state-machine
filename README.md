@@ -172,5 +172,5 @@ of the BBSM instance.
 
 ## Release Notes:
 
-* 2013-07-24 -
+* 2013-07-24 - 0.0.4 - requirejs support, expanded readme
 * 2013-07-22 - 0.0.3
