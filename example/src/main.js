@@ -29,61 +29,31 @@ require.config({
         bbsm: '../../src/bbsm',
         text: '../../components/requirejs-text/text',
         elevator: 'views/elevator',
-        floor: 'views/floor'
+        floor: 'views/floor',
+        building: 'views/building',
+        buttonPressedCollection: 'models/buttonPressedCollection'
     }
 });
 
 require([
     'elevator',
-    'floor'
-], function (Elevator, Floor) {
+    'building',
+    'buttonPressedCollection'
+], function (Elevator, Building, ButtonPressedCollection) {
 
-    var WAITING_WITH_DOORS_OPEN = "waitingWithDoorsOpen",
-        DOORS_CLOSING = "doorsClosing",
-        DOORS_OPENING = "doorsOpening",
-        MOVING_UP = "movingUp",
-        MOVING_DOWN = "movingDown",
-        UP = Floor.prototype.masks.UP_MASK,
-        DOWN = Floor.prototype.masks.DOWN_MASK,
-        floor1, floor2, floor3,
+    var building,
+        buttonPressedCollection = new ButtonPressedCollection(),
         elevator = new Elevator({
-        initialState: "waitingWithDoorsOpen",
-        states: {
-            waitingWithDoorsOpen: {
-                allowedTransitions: [
-                    DOORS_CLOSING
-                ]
-            },
-            doorsClosing: {
-                allowedTransitions: [
-                    DOORS_OPENING, MOVING_UP, MOVING_DOWN
-                ]
-            },
-            doorsOpening: {
-                allowedTransitions: [
-                    WAITING_WITH_DOORS_OPEN
-                ]
-            },
-            movingUp: {
-                allowedTransitions: [
-                    DOORS_OPENING
-                ]
-            },
-            movingDown: {
-                allowedTransitions: [
-                    DOORS_OPENING
-                ]
-            }
-        }
-    });
+            buttonPressedCollection: buttonPressedCollection
+        });
 
     elevator.start().render();
 
-    floor1 = new Floor({
-        floor: 1,
-        buttons: UP,
-        el: "#floor1"
+    building = new Building({
+        numberOfFloors: 5,
+        elevator: elevator,
+        buttonPressedCollection: buttonPressedCollection
     });
 
-    floor1.render();
+    building.render();
 });
