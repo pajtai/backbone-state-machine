@@ -33,7 +33,7 @@ grunt server
 
 ### Summary
 
-Step 1: Extend BBSM
+Step 1: Extend BBSM adding mneeded methods and a description of the states
 
 ```javascript
 var MyBBSM = BBSM.extend({
@@ -43,7 +43,10 @@ var MyBBSM = BBSM.extend({
         // Then customize
         // ...
     },
-    render: function() {
+    render: function() { ... },
+    state: {
+        ...
+    }
     ...
     ...
 });
@@ -53,11 +56,7 @@ Step 2: Start the State Machine
 
 ```javascript
 // First create an instance
-var initObject = { ... }
-    bbsm = new MyBBSM(initObject);
-
-// Then do any additional setup work (e.g. setting custom listeners)
-...
+var bbsm = new MyBBSM();
 
 // Finally, start the State Machine
 bbsm.start();
@@ -71,9 +70,7 @@ bbsm.exampleMethod();
 
 ### Step by Step
 
-You can use BBSM as is, but you probably want to - at a minimum - add your own render
-method. To customize BBSM, you have to first extend it, then initialized it, and finally
-start the state machine.
+To customize BBSM, you have to first extend it.
 
 #### Extending BBSM
 
@@ -96,23 +93,6 @@ var CustomBBSM = BBSM.extend({
     render: function() {
         ...
     },
-    ...
-});
-```
-
-#### Initializing and starting BBSM
-
-An initializing object is used to setup the state machine:
-
-```javascript
-myStateMachine = new CustomBBSM(initObject);
-```
-
-The initialization object contains the initial state referred to as a string, a 'states' object
-that describes each state as a field, and an array of event listeners you want to attach to your view.
-
-```javascript
-var initObject = {
     initialState: "theInitialState",
     states: {
         state1: state1Description,

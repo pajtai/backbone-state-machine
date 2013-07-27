@@ -50,12 +50,8 @@ describe( "A Backbone-State-Machine,", function () {
         sinon.spy(initObject.states.notStarted, "start");
 
         // Setup a semi realistic use case with an overridden init method
-        TestBBSM = BBSM.extend({
-            initialize: function() {
-                TestBBSM.__super__.initialize.apply(this, arguments);
-            }
-        });
-        bbsm = new TestBBSM(initObject);
+        TestBBSM = BBSM.extend(initObject);
+        bbsm = new TestBBSM();
 
         testListener = {};
         _.extend(testListener, Backbone.Events);
@@ -85,6 +81,8 @@ describe( "A Backbone-State-Machine,", function () {
         beforeEach(function() {
             originalStartMethod = bbsm.start;
             bbsm.start();
+            console.log("is: " + bbsm.initialState);
+            console.log("- " + bbsm.getState());
         });
 
         it("stores the states from the passed in objects .states", function() {
@@ -98,13 +96,13 @@ describe( "A Backbone-State-Machine,", function () {
             });
 
             it("that is 'undefined' if not provided", function() {
-                var bbsm2 = new BBSM({
+                var bbsm2 = new (BBSM.extend({
                     states: {
                         first: {
 
                         }
                     }
-                });
+                }));
                 bbsm2.start();
                 should.not.exist(bbsm2.getState());
             });
@@ -282,7 +280,7 @@ describe( "A Backbone-State-Machine,", function () {
                 it("use the proper context", function() {
 
                     // Setup a BBSM example that relies on context
-                    var bbsm2 = new BBSM({
+                    var bbsm2 = new (BBSM.extend({
                         initialState: "first",
                         states: {
                             first: {
@@ -291,7 +289,7 @@ describe( "A Backbone-State-Machine,", function () {
                                 }
                             }
                         }
-                    });
+                    }));
 
                     bbsm2.start();
                     bbsm2.testField = 2;

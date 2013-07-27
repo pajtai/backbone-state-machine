@@ -41,28 +41,28 @@
 
     // TODO: write test for instantStart
     function initialize() {
-        var states = this.options.states;
+        var states = this.states;
         this.stateModel = new Backbone.Model();
         this.stateModel.set(STATES, _.keys(states));
-        this.states = this.options.states;
         // TODO: test instantStart
         if (this.options.instantStart) {
             this.start();
         }
+        _setupAvailableMethods.call(this);
+        _setupMethods.call(this);
+
     }
 
     // There is a separate start methods, so that listeners that are attached to the
     // returned instance of a new BBSM are able to listen to all events
     function start() {
-        var listeners = _.keys(this.options.eventListeners || {});
+        var listeners = _.keys(this.eventListeners || {});
         this.start = undefined;
-        _setupAvailableMethods.call(this);
         this.listenTo(this.stateModel, "change:" + CURRENT_STATE, _currentStateChanged.bind(this));
         _setupListeners.call(this, listeners);
-        _setupMethods.call(this);
         // TODO: put this in a .startMachine or some such
-        if (this.options.initialState) {
-            this.transition(this.options.initialState);
+        if (this.initialState) {
+            this.transition(this.initialState);
         }
         return this;
     }
@@ -140,9 +140,18 @@
         stateMethods = states.availableMethods;
         _.forEach(stateMethods, function(oneStateMethod) {
             if (typeof states[oneStateMethod] === FUNCTION) {
-                self[oneStateMethod] = function() {
-                    self.trigger(ON_METHOD_NOT_HANDLED, oneStateMethod);
-                };
+                self[oneStateMethod]  = (function(oneStateMethod) {
+                    var noopMethod = function() {
+                        if (noopMethod === self[oneStateMethod]) {
+                            console.log(oneStateMethod + " not handled");
+                            self.trigger(ON_METHOD_NOT_HANDLED, oneStateMethod);
+                        } else {
+                            self[oneStateMethod].apply(self, arguments);
+                        }
+
+                    };
+                    return noopMethod;
+                }(oneStateMethod));
             }
         });
     }
@@ -190,8 +199,6 @@
 
     function _setupAvailableMethods() {
         var self = this;
-        // Remove the start method so it cannot be called again
-        this.start = undefined;
         _.forEach(_.keys(this.states), function(stateName) {
             self.states[stateName].availableMethods =
                 _.without(_.keys(self.states[stateName]),

@@ -41,48 +41,11 @@ require([
     'buttonPressedCollection'
 ], function (Elevator, Building, ButtonPressedCollection) {
 
-    var WAITING_WITH_DOORS_OPEN = "waitingWithDoorsOpen",
-        DOORS_CLOSING = "doorsClosing",
-        DOORS_OPENING = "doorsOpening",
-        MOVING_UP = "movingUp",
-        MOVING_DOWN = "movingDown",
-        building,
+    var building,
         buttonPressedCollection = new ButtonPressedCollection(),
         elevator = new Elevator({
-            buttonPressedCollection: buttonPressedCollection,
-            initialState: "waitingWithDoorsOpen",
-            states: {
-                waitingWithDoorsOpen: {
-                    beginPickingPeopleUp: function() {
-                        console.log("!!!!");
-                        this.beginPickingPeopleUp();
-                    },
-                    allowedTransitions: [
-                        DOORS_CLOSING
-                    ]
-                },
-                doorsClosing: {
-                    allowedTransitions: [
-                        DOORS_OPENING, MOVING_UP, MOVING_DOWN
-                    ]
-                },
-                doorsOpening: {
-                    allowedTransitions: [
-                        WAITING_WITH_DOORS_OPEN
-                    ]
-                },
-                movingUp: {
-                    allowedTransitions: [
-                        DOORS_OPENING
-                    ]
-                },
-                movingDown: {
-                    allowedTransitions: [
-                        DOORS_OPENING
-                    ]
-                }
-            }
-    });
+            buttonPressedCollection: buttonPressedCollection
+        });
 
     elevator.start().render();
 
