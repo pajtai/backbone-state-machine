@@ -12,6 +12,7 @@ describe( "A Backbone-State-Machine,", function () {
 
     chai.Assertion.includeStack = false;
 
+    //TODO: add methods that test shared functions among states
     beforeEach(function() {
 
         allEvents = [];
@@ -19,7 +20,8 @@ describe( "A Backbone-State-Machine,", function () {
             initialState : "notStarted",
             states : {
                 "notStarted" : {
-                    start : function () {
+                    testMethod: function() {
+
                     },
                     onExit: function() {
                     },
@@ -47,7 +49,7 @@ describe( "A Backbone-State-Machine,", function () {
             }
         };
 
-        sinon.spy(initObject.states.notStarted, "start");
+        sinon.spy(initObject.states.notStarted, "testMethod");
 
         // Setup a semi realistic use case with an overridden init method
         TestBBSM = BBSM.extend(initObject);
@@ -62,7 +64,7 @@ describe( "A Backbone-State-Machine,", function () {
 
     afterEach(function() {
         testListener.stopListening();
-        initObject.states.notStarted.start.restore();
+        initObject.states.notStarted.testMethod.restore();
     });
 
     it("does not get a state until .start() is called", function() {
@@ -123,15 +125,9 @@ describe( "A Backbone-State-Machine,", function () {
                 should.not.exist(bbsm.onExit);
             });
 
-            describe(" - if it has a method called 'start' -", function() {
-                it("will replace bbsm.start with its own method", function() {
-                    bbsm.start.should.not.equal(originalStartMethod);
-                });
-            });
-
             it("gets its methods attached", function() {
 
-                var notStartedMethods = ["start"];
+                var notStartedMethods = ["testMethod"];
                 bbsm.getState().should.equal("notStarted");
                 _.forEach(notStartedMethods, function(methodName) {
                     (typeof bbsm[methodName]).should.equal("function");
@@ -273,9 +269,9 @@ describe( "A Backbone-State-Machine,", function () {
 
             describe("that are in the current state", function() {
                 it("can be called", function() {
-                    initObject.states.notStarted.start.should.not.have.been.called;
-                    bbsm.start();
-                    initObject.states.notStarted.start.should.have.been.called;
+                    initObject.states.notStarted.testMethod.should.not.have.been.called;
+                    bbsm.testMethod();
+                    initObject.states.notStarted.testMethod.should.have.been.called;
                 });
                 it("use the proper context", function() {
 
@@ -304,19 +300,19 @@ describe( "A Backbone-State-Machine,", function () {
                     allEvents = [];
                 });
                 it("exist", function() {
-                    should.exist(bbsm.start);
+                    should.exist(bbsm.testMethod);
                 });
                 it("cannot be successfully called", function() {
                     // 'started' state has not 'start' method
                     bbsm.transition("started");
-                    initObject.states.notStarted.start.should.not.have.been.called;
-                    bbsm.start();
-                    initObject.states.notStarted.start.should.not.have.been.called;
+                    initObject.states.notStarted.testMethod.should.not.have.been.called;
+                    bbsm.testMethod();
+                    initObject.states.notStarted.testMethod.should.not.have.been.called;
                 });
                 it("trigger an onMethodNotHandled event with the method names as the argument", function() {
-                    bbsm.start();
+                    bbsm.testMethod();
                     allEvents[0][0].should.equal("onMethodNotHandled");
-                    allEvents[0][1].should.equal("start");
+                    allEvents[0][1].should.equal("testMethod");
                 });
             });
         });
