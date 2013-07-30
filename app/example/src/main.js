@@ -47,7 +47,6 @@ require([
             buttonPressedCollection: buttonPressedCollection
         });
 
-    elevator.start().render();
 
     building = new Building({
         numberOfFloors: 5,
@@ -56,4 +55,6 @@ require([
     });
 
     building.render();
+    $("#elevator-shaft").height($("#floors").height());
+    elevator.start().render();
 });

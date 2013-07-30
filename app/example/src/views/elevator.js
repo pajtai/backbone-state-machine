@@ -4,6 +4,7 @@ define([
 ], function (BBSM, elevatorTemplate) {
 
     var BUTTON_PRESSED = "buttonPressed",
+        CURRENT_FLOOR = "currentFloor",
         CURRENT_PICKUP = "currentPickup",
         CURRENT_STATE = "currentState",
         WAITING_WITH_DOORS_OPEN = "waitingWithDoorsOpen",
@@ -28,7 +29,8 @@ define([
         initialState: "waitingWithDoorsOpen",
         states: {
             waitingWithDoorsOpen: {
-                beginPickingPeopleUp: beginPickkingPeopleUp,
+                onEnter: setToGroundFloor,
+                beginPickingPeopleUp: beginPickingPeopleUp,
                 allowedTransitions: [
                     BUSY_WITH_DOORS_OPEN
                 ]
@@ -41,6 +43,7 @@ define([
                 ]
             },
             doorsClosing: {
+                beginMoving: beginMoving,
                 allowedTransitions: [
                     DOORS_OPENING, MOVING_UP, MOVING_DOWN
                 ]
@@ -51,11 +54,13 @@ define([
                 ]
             },
             movingUp: {
+                moveToFloor: moveToFloor,
                 allowedTransitions: [
                     DOORS_OPENING
                 ]
             },
             movingDown: {
+                moveToFloor: moveToFloor,
                 allowedTransitions: [
                     DOORS_OPENING
                 ]
@@ -74,11 +79,16 @@ define([
     function setupEventListeners() {
         this.listenTo(this.buttonPressedCollection, "add", this.beginPickingPeopleUp);
         this.listenTo(this.model, "change:" + CURRENT_PICKUP, this.goToPickupFloor);
-        this.listenTo(this.stateModel, "change:" + CURRENT_STATE, this.render)
+        this.listenTo(this.model, "change:" + CURRENT_FLOOR, this.render);
+        this.listenTo(this.stateModel, "change:" + CURRENT_STATE, this.render);
     }
 
     function render() {
-        var html = this.template({currentState: this.getState()});
+        var html = this.template({
+            currentState: this.getState(),
+            currentFloor: this.model.get(CURRENT_FLOOR)
+        });
+
         this.$el.html(html);
     }
 
@@ -88,15 +98,35 @@ define([
         this.model.set(CURRENT_PICKUP, buttonPressed.get(FLOOR));
     }
 
-    function beginPickkingPeopleUp() {
+    function beginPickingPeopleUp() {
         console.log("begin");
         this.transition(BUSY_WITH_DOORS_OPEN);
         this.getNextKeyPress();
     }
 
     function goToPickupFloor(model, floor) {
-        console.log("------");
-        console.log(floor);
+        this.transition(DOORS_CLOSING);
+        this.beginMoving();
+    }
+
+    function setToGroundFloor() {
+        this.model.set(CURRENT_FLOOR, 1);
+    }
+
+    function beginMoving() {
+        var moveTo = this.model.get(CURRENT_PICKUP),
+            transitionTo = this.model.get(CURRENT_FLOOR) > this.model.get(moveTo) ? MOVING_DOWN : MOVING_UP;
+        this.transition(transitionTo);
+        this.moveToFloor(moveTo);
+    }
+
+    function moveToFloor(moveTo) {
+        this.model.set(CURRENT_FLOOR, moveTo);
+        _.defer(function() {
+            this.transition(WAITING_WITH_DOORS_OPEN);
+            console.log("state: " + this.getState());
+        }.bind(this));
+
     }
 
     return Elevator;

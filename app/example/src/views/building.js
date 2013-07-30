@@ -7,22 +7,26 @@ define([
         DOWN = Floor.prototype.masks.DOWN_MASK,
         BUTTON_QUEUE = "buttonQueue",
         BUTTON_PRESSED = "buttonPressed",
+        CURRENT_FLOOR = "currentFloor",
         Building = Backbone.View.extend({
             el: "#floors",
             // Variables we will define later. Listed for easy reference.
             numberOfFloors: undefined,
             elevator: undefined,
             buttonPressedCollection: undefined,
+            floorIds: [],
             //
             initialize: initialize,
             render: render,
             updateButtonPressedQueue: updateButtonPressedQueue,
+            elevatorFloorChanged: elevatorFloorChanged,
             model: Backbone.Model
     });
 
     function initialize() {
         this.numberOfFloors = this.options.numberOfFloors;
         this.elevator = this.options.elevator;
+        this.listenTo(this.elevator.model, "change:" + CURRENT_FLOOR, this.elevatorFloorChanged);
         this.buttonPressedCollection = this.options.buttonPressedCollection;
         this.model = new this.model({
             buttonQueue: []
@@ -54,6 +58,7 @@ define([
                 self: this,
                 floor: i
             }));
+            this.floorIds[i] = id;
         }
     }
 
@@ -70,6 +75,13 @@ define([
                 buttonPressed: buttonMask ^ previousButtonMask
             }
         );
+    }
+
+    function elevatorFloorChanged(model, floor) {
+        //TODO: cache dom refs
+        $("#elevator").animate({
+            top: $("#" + this.floorIds[floor]).position().top
+        });
     }
 
     return Building;
