@@ -47,7 +47,6 @@ require([
             buttonPressedCollection: buttonPressedCollection
         });
 
-    elevator.start().render();
 
     building = new Building({
         numberOfFloors: 5,
@@ -56,4 +55,6 @@ require([
     });
 
     building.render();
+    building.installElevator();
+    elevator.start().render();
 });

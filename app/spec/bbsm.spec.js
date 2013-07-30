@@ -12,7 +12,9 @@ describe( "A Backbone-State-Machine,", function () {
 
     chai.Assertion.includeStack = false;
 
+    //TODO: add test for context binding for onEnter and onExit
     //TODO: add methods that test shared functions among states
+    //TODO: check that onEnter and onExit methods are not available outside of state
     beforeEach(function() {
 
         allEvents = [];

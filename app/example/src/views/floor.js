@@ -4,7 +4,7 @@ define([
 ], function(Backbone, floorTemplate) {
     var UP_PRESSED = "upPressed",
         DOWN_PRESSED = "downPressed",
-        BUTTONS_PRESSED = "buttonsPressed",
+        BUTTONS_PRESSED = "buttonPressed",
         Floor = Backbone.View.extend({
         initialize: initialize,
         render: render,
@@ -18,6 +18,7 @@ define([
         model: Backbone.Model
     });
 
+    // TODO: config object
     Floor.prototype.masks =  {
         UP_MASK: 2,
         DOWN_MASK: 1
