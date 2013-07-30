@@ -37,7 +37,7 @@ define([
             elevatorFloorChanged:elevatorFloorChanged,
         states: {
             doorsOpen: {
-                onEnter: setToGroundFloor,
+                onEnter: getNextKeyPress,
                 beginPickingPeopleUp: beginPickingPeopleUp,
                 goToPickupFloor: goToPickupFloor,
                 getNextKeyPress: getNextKeyPress,
@@ -105,7 +105,8 @@ define([
 
     function getNextKeyPress() {
         var buttonPressed = this.buttonPressedCollection.shift();
-        this.model.set(CURRENT_PICKUP, buttonPressed.get(FLOOR));
+        this.model.set(CURRENT_PICKUP, buttonPressed ? buttonPressed.get(FLOOR) : 1);
+
     }
 
     function beginPickingPeopleUp() {
