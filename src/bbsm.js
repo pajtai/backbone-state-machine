@@ -177,7 +177,7 @@
         var state = this.getState(),
             onEnter = state ? this.states[state].onEnter : false;
         if (onEnter) {
-            onEnter();
+            onEnter.apply(this, arguments);
         }
     }
 
@@ -186,7 +186,7 @@
         var state = this.getState(),
             onExit = state ? this.states[this.getState()].onExit : false;
         if (onExit) {
-            onExit();
+            onExit.apply(this, arguments);
         }
     }
 
