@@ -55,6 +55,6 @@ require([
     });
 
     building.render();
-    $("#elevator-shaft").height($("#floors").height());
+    building.installElevator();
     elevator.start().render();
 });

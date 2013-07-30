@@ -10,23 +10,22 @@ define([
         CURRENT_FLOOR = "currentFloor",
         Building = Backbone.View.extend({
             el: "#floors",
+            model: Backbone.Model,
             // Variables we will define later. Listed for easy reference.
             numberOfFloors: undefined,
             elevator: undefined,
             buttonPressedCollection: undefined,
-            floorIds: [],
+            floors: [],
             //
             initialize: initialize,
             render: render,
             updateButtonPressedQueue: updateButtonPressedQueue,
-            elevatorFloorChanged: elevatorFloorChanged,
-            model: Backbone.Model
+            installElevator: installElevator
     });
 
     function initialize() {
         this.numberOfFloors = this.options.numberOfFloors;
         this.elevator = this.options.elevator;
-        this.listenTo(this.elevator.model, "change:" + CURRENT_FLOOR, this.elevatorFloorChanged);
         this.buttonPressedCollection = this.options.buttonPressedCollection;
         this.model = new this.model({
             buttonQueue: []
@@ -58,7 +57,7 @@ define([
                 self: this,
                 floor: i
             }));
-            this.floorIds[i] = id;
+            this.floors[i] = floor;
         }
     }
 
@@ -67,7 +66,6 @@ define([
         var self = this.self,
             previousButtonMask = model.previous(BUTTON_PRESSED);
 
-        console.log("pressed");
         self.buttonPressedCollection.add(
             {
                 floor: this.floor,
@@ -77,11 +75,13 @@ define([
         );
     }
 
-    function elevatorFloorChanged(model, floor) {
-        //TODO: cache dom refs
-        $("#elevator").animate({
-            top: $("#" + this.floorIds[floor]).position().top
-        });
+    function installElevator() {
+        var i;
+
+        $("#elevator-shaft").height($("#floors").height());
+        for (i=this.numberOfFloors; i>0; --i) {
+            this.elevator.setFloorHeight(i, this.floors[i].$el.position().top);
+        }
     }
 
     return Building;

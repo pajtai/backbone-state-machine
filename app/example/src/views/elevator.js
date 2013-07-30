@@ -3,6 +3,13 @@ define([
     'text!../templates/elevator.html'
 ], function (BBSM, elevatorTemplate) {
 
+    // Elevator states
+    // Doors open
+    // Doors closing
+    // Doors opening
+    // Doors closed - Moving up
+    // Doors closed - Moving down
+
     var BUTTON_PRESSED = "buttonPressed",
         CURRENT_FLOOR = "currentFloor",
         CURRENT_PICKUP = "currentPickup",
@@ -16,17 +23,21 @@ define([
         MOVING_DOWN = "movingDown",
         UP_MASK = 2,
         DOWN_MASK = 1,
+        ELEVATOR_SPEED_MS_FLOOR = 1000,
         Elevator = BBSM.extend({
         el: "#elevator",
         template: _.template(elevatorTemplate),
         // Variables to be defined later. Listed for easy reference.
         buttonPressedCollection: undefined,
+        floors: [],
         //
         initialize: initialize,
         setupEventListeners: setupEventListeners,
         render: render,
         getNextKeyPress: getNextKeyPress,
+        setFloorHeight: setFloorHeight,
         initialState: "waitingWithDoorsOpen",
+            elevatorFloorChanged:elevatorFloorChanged,
         states: {
             waitingWithDoorsOpen: {
                 onEnter: setToGroundFloor,
@@ -81,6 +92,7 @@ define([
         this.listenTo(this.model, "change:" + CURRENT_PICKUP, this.goToPickupFloor);
         this.listenTo(this.model, "change:" + CURRENT_FLOOR, this.render);
         this.listenTo(this.stateModel, "change:" + CURRENT_STATE, this.render);
+        this.listenTo(this.model, "change:" + CURRENT_FLOOR, this.elevatorFloorChanged);
     }
 
     function render() {
@@ -94,12 +106,10 @@ define([
 
     function getNextKeyPress() {
         var buttonPressed = this.buttonPressedCollection.shift();
-        console.log(buttonPressed.get(BUTTON_PRESSED));
         this.model.set(CURRENT_PICKUP, buttonPressed.get(FLOOR));
     }
 
     function beginPickingPeopleUp() {
-        console.log("begin");
         this.transition(BUSY_WITH_DOORS_OPEN);
         this.getNextKeyPress();
     }
@@ -122,11 +132,22 @@ define([
 
     function moveToFloor(moveTo) {
         this.model.set(CURRENT_FLOOR, moveTo);
-        _.defer(function() {
-            this.transition(WAITING_WITH_DOORS_OPEN);
-            console.log("state: " + this.getState());
-        }.bind(this));
+    }
 
+    function setFloorHeight(floor, height) {
+        this.floors[floor] = height;
+    }
+
+
+    function elevatorFloorChanged(model, floor) {
+        this.$el.animate({
+                top: this.floors[floor]
+            },
+            Math.abs(model.previous(CURRENT_FLOOR) - floor) * ELEVATOR_SPEED_MS_FLOOR,
+            "swing",
+            function() {
+                this.transition(DOORS_OPENING)
+            }.bind(this));
     }
 
     return Elevator;
