@@ -10,19 +10,16 @@ define([
     // Doors closed - Moving up
     // Doors closed - Moving down
 
-    var BUTTON_PRESSED = "buttonPressed",
-        CURRENT_FLOOR = "currentFloor",
+    var CURRENT_FLOOR = "currentFloor",
         CURRENT_PICKUP = "currentPickup",
         CURRENT_STATE = "currentState",
-        WAITING_WITH_DOORS_OPEN = "waitingWithDoorsOpen",
-        BUSY_WITH_DOORS_OPEN = "busyWithDoorsOpen",
+        DOORS_OPEN = "doorsOpen",
+        DOORS_CLOSED = "doorsClosed",
         DOORS_CLOSING = "doorsClosing",
         DOORS_OPENING = "doorsOpening",
         FLOOR = "floor",
         MOVING_UP = "movingUp",
         MOVING_DOWN = "movingDown",
-        UP_MASK = 2,
-        DOWN_MASK = 1,
         ELEVATOR_SPEED_MS_FLOOR = 1000,
         Elevator = BBSM.extend({
         el: "#elevator",
@@ -36,17 +33,12 @@ define([
         render: render,
         getNextKeyPress: getNextKeyPress,
         setFloorHeight: setFloorHeight,
-        initialState: "waitingWithDoorsOpen",
+        initialState: "doorsOpen",
             elevatorFloorChanged:elevatorFloorChanged,
         states: {
-            waitingWithDoorsOpen: {
-                onEnter: setToGroundFloor,
+            doorsOpen: {
+                onEnter: getNextKeyPress,
                 beginPickingPeopleUp: beginPickingPeopleUp,
-                allowedTransitions: [
-                    BUSY_WITH_DOORS_OPEN
-                ]
-            },
-            busyWithDoorsOpen: {
                 goToPickupFloor: goToPickupFloor,
                 getNextKeyPress: getNextKeyPress,
                 allowedTransitions: [
@@ -54,14 +46,21 @@ define([
                 ]
             },
             doorsClosing: {
-                beginMoving: beginMoving,
+                onEnter: closeDoors,
                 allowedTransitions: [
-                    DOORS_OPENING, MOVING_UP, MOVING_DOWN
+                    DOORS_OPENING, DOORS_CLOSED
                 ]
             },
             doorsOpening: {
+                onEnter: openDoors,
                 allowedTransitions: [
-                    WAITING_WITH_DOORS_OPEN
+                    DOORS_OPEN
+                ]
+            },
+            doorsClosed: {
+                onEnter: beginMoving,
+                allowedTransitions: [
+                    MOVING_UP, MOVING_DOWN
                 ]
             },
             movingUp: {
@@ -106,17 +105,16 @@ define([
 
     function getNextKeyPress() {
         var buttonPressed = this.buttonPressedCollection.shift();
-        this.model.set(CURRENT_PICKUP, buttonPressed.get(FLOOR));
+        this.model.set(CURRENT_PICKUP, buttonPressed ? buttonPressed.get(FLOOR) : 1);
+
     }
 
     function beginPickingPeopleUp() {
-        this.transition(BUSY_WITH_DOORS_OPEN);
         this.getNextKeyPress();
     }
 
     function goToPickupFloor(model, floor) {
         this.transition(DOORS_CLOSING);
-        this.beginMoving();
     }
 
     function setToGroundFloor() {
@@ -148,6 +146,14 @@ define([
             function() {
                 this.transition(DOORS_OPENING)
             }.bind(this));
+    }
+
+    function openDoors() {
+        this.transition(DOORS_OPEN);
+    }
+
+    function closeDoors() {
+        this.transition(DOORS_CLOSED);
     }
 
     return Elevator;
