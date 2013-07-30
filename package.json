@@ -1,7 +1,7 @@
 {
   "name": "backbone-state-machine",
   "description": "A Backbone View with a built in Finite State Machine",
-  "version": "0.0.6-inProgress",
+  "version": "0.0.6",
   "homepage": "",
   "repository": {
     "type": "git",
